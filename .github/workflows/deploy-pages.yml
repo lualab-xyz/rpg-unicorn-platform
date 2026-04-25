@@ -43,6 +43,7 @@ jobs:
         with:
           version: 4.6.2
           use-dotnet: false
+          include-templates: true
 
       - name: Build Godot web export
         if: ${{ hashFiles('apps/godot-player/project.godot') != '' }}
