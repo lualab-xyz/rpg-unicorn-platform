@@ -48,3 +48,8 @@
 - Estado: acordada.
 - Decisión: priorizar look&feel pixel-art (tile look, escala entera, sprites pixelados, animación por frames discretos) sobre estética vectorial.
 - Motivo: la siguiente validación del prototipo exige parecer un juego 8-bit y no una demo geométrica libre.
+
+### D-009 — Reemplazar vectores por sprites raster para mundo y UI
+- Estado: acordada.
+- Decisión: usar PNGs para tiles, personajes y marcos de UI; evitar trazos vectoriales para conseguir estética RPG retro real.
+- Motivo: la percepción visual seguía siendo vectorial y no cumplía con la validación de estilo 8-bit solicitada.

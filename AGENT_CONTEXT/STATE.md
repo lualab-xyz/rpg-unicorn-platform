@@ -52,6 +52,12 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - sprites simplificados por píxel para unicornio,
   - animación de caminata por alternancia de frames discretos,
   - overlay scanline suave para estética CRT ligera.
+- Iteración raster aplicada para eliminar estética vectorial:
+  - generación de assets PNG en `tools/generate_pixel_assets.py`,
+  - tiles/world render desde `assets/sprites/tileset.png`,
+  - personajes desde `assets/sprites/unicorn_player.png` y `assets/sprites/unicorn_npc.png`,
+  - paneles y botones UI con 9-slice PNG,
+  - texto bitmap con atlas `assets/ui/font-6x8.png` renderizado en capa dedicada.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

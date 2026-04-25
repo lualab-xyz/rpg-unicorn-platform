@@ -38,4 +38,8 @@ Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
 - [x] Registrar decisión de validación visual 8-bit en `AGENT_CONTEXT/DECISIONS.md`.
 - [x] Migrar render del prototipo a estética 8-bit (tiles, paleta limitada y pixel scale).
 - [x] Cambiar movimiento y animación a estilo más retro (paso discreto por frames).
-- [ ] Publicar ajustes visuales y validar percepción 8-bit en Pages.
+- [x] Registrar decisión de eliminar look vectorial y usar sprites raster para mundo/UI.
+- [x] Generar sprites y atlas base (tileset, unicornios, paneles de UI y font bitmap).
+- [x] Integrar sprites PNG en render del mundo y personajes.
+- [x] Integrar marcos de UI raster (9-slice) y texto bitmap sobre HUD/diálogo.
+- [ ] Publicar ajustes raster y validar percepción retro en Pages.

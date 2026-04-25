@@ -1,5 +1,7 @@
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
+const textCanvas = document.getElementById("pixel-text-layer");
+const textCtx = textCanvas.getContext("2d");
 
 const dialogBox = document.getElementById("dialog-box");
 const dialogSpeaker = document.getElementById("dialog-speaker");
@@ -13,23 +15,6 @@ const btnTalk = document.getElementById("btn-talk");
 const btnSelect = document.getElementById("btn-select");
 
 const TILE = 16;
-const palette = {
-  grassA: "#79d26b",
-  grassB: "#69bc5d",
-  grassFlower: "#fce8ff",
-  pathA: "#e3c088",
-  pathB: "#d2ab73",
-  waterA: "#4f95e8",
-  waterB: "#2d6fc2",
-  waterFoam: "#8fd0ff",
-  bridgeA: "#ad7d4d",
-  bridgeB: "#7c5330",
-  bridgeEdge: "#593721",
-  treeTrunk: "#5a3b24",
-  treeLeafA: "#b08dff",
-  treeLeafB: "#8f6de2",
-};
-
 const WORLD = {
   width: 2200,
   height: 1400,
@@ -97,12 +82,49 @@ const pressedThisFrame = {
 
 const camera = { x: 0, y: 0 };
 
+const assets = {
+  tileset: new Image(),
+  player: new Image(),
+  npc: new Image(),
+  panel: new Image(),
+  button: new Image(),
+  font: new Image(),
+};
+
+const fontAtlas = {
+  chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,:!?+-/ '",
+  cols: 8,
+  glyphW: 6,
+  glyphH: 8,
+};
+
 let viewW = 0;
 let viewH = 0;
 let viewportScale = 1;
 let viewportWidthWorld = 0;
 let viewportHeightWorld = 0;
 let lastTime = 0;
+
+function loadAssets() {
+  const files = [
+    ["tileset", "./assets/sprites/tileset.png"],
+    ["player", "./assets/sprites/unicorn_player.png"],
+    ["npc", "./assets/sprites/unicorn_npc.png"],
+    ["panel", "./assets/ui/panel-9slice.png"],
+    ["button", "./assets/ui/button-9slice.png"],
+    ["font", "./assets/ui/font-6x8.png"],
+  ];
+
+  return Promise.all(
+    files.map(([key, src]) =>
+      new Promise((resolve, reject) => {
+        assets[key].onload = resolve;
+        assets[key].onerror = reject;
+        assets[key].src = src;
+      }),
+    ),
+  );
+}
 
 function resize() {
   const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
@@ -122,6 +144,14 @@ function resize() {
 
   viewW = window.innerWidth;
   viewH = window.innerHeight;
+
+  const dprText = window.devicePixelRatio || 1;
+  textCanvas.width = Math.floor(viewW * dprText);
+  textCanvas.height = Math.floor(viewH * dprText);
+  textCanvas.style.width = `${viewW}px`;
+  textCanvas.style.height = `${viewH}px`;
+  textCtx.setTransform(dprText, 0, 0, dprText, 0, 0);
+  textCtx.imageSmoothingEnabled = false;
 }
 
 function clamp(v, min, max) {
@@ -305,10 +335,14 @@ function toScreen(wx, wy) {
   return { x: Math.round(wx - camera.x), y: Math.round(wy - camera.y) };
 }
 
-function drawGround() {
-  ctx.fillStyle = palette.grassA;
-  ctx.fillRect(0, 0, viewportWidthWorld, viewportHeightWorld);
+function drawTile(tileIndex, dx, dy) {
+  const cols = 8;
+  const sx = (tileIndex % cols) * TILE;
+  const sy = Math.floor(tileIndex / cols) * TILE;
+  ctx.drawImage(assets.tileset, sx, sy, TILE, TILE, dx, dy, TILE, TILE);
+}
 
+function drawGround() {
   const startX = Math.floor(camera.x / TILE) * TILE;
   const startY = Math.floor(camera.y / TILE) * TILE;
   const endX = camera.x + viewportWidthWorld + TILE;
@@ -318,12 +352,10 @@ function drawGround() {
     for (let x = startX; x < endX; x += TILE) {
       const sx = x - camera.x;
       const sy = y - camera.y;
-      const v = ((x / TILE) + (y / TILE)) % 2;
-      ctx.fillStyle = v === 0 ? palette.grassA : palette.grassB;
-      ctx.fillRect(sx, sy, TILE, TILE);
+      const check = ((x / TILE) + (y / TILE)) % 2;
+      drawTile(check === 0 ? 0 : 1, sx, sy);
       if (((x / TILE) * 13 + (y / TILE) * 7) % 29 === 0) {
-        ctx.fillStyle = palette.grassFlower;
-        ctx.fillRect(sx + 6, sy + 6, 3, 3);
+        drawTile(2, sx, sy);
       }
     }
   }
@@ -331,116 +363,80 @@ function drawGround() {
 
 function drawWorld() {
   const river = toScreen(WORLD.river.x, WORLD.river.y);
-  ctx.fillStyle = palette.waterA;
-  ctx.fillRect(river.x, river.y, WORLD.river.w, WORLD.river.h);
-
   const phase = Math.floor(performance.now() / 220) % 2;
   for (let y = 0; y < WORLD.river.h; y += TILE) {
     for (let x = 0; x < WORLD.river.w; x += TILE) {
       const v = ((x / TILE) + (y / TILE) + phase) % 2;
-      ctx.fillStyle = v === 0 ? palette.waterA : palette.waterB;
-      ctx.fillRect(river.x + x, river.y + y, TILE, TILE);
+      drawTile(v === 0 ? 5 : 6, river.x + x, river.y + y);
     }
-    ctx.fillStyle = palette.waterFoam;
-    ctx.fillRect(river.x + ((y / TILE + phase) % 2) * 8, river.y + y + 2, WORLD.river.w - 8, 2);
   }
 
   const bridge = toScreen(WORLD.bridge.x, WORLD.bridge.y);
-  ctx.fillStyle = palette.bridgeA;
-  ctx.fillRect(bridge.x, bridge.y, WORLD.bridge.w, WORLD.bridge.h);
-  ctx.fillStyle = palette.bridgeB;
-  for (let x = 0; x < WORLD.bridge.w; x += TILE) {
-    ctx.fillRect(bridge.x + x, bridge.y + 2, TILE - 2, WORLD.bridge.h - 4);
-  }
-  ctx.fillStyle = palette.bridgeEdge;
-  ctx.fillRect(bridge.x, bridge.y, WORLD.bridge.w, 2);
-  ctx.fillRect(bridge.x, bridge.y + WORLD.bridge.h - 2, WORLD.bridge.w, 2);
-
-  const pathLeft = toScreen(120, 705);
-  for (let x = 0; x < 860; x += TILE) {
-    for (let y = 0; y < 42; y += TILE) {
-      const v = ((x / TILE) + (y / TILE)) % 2;
-      ctx.fillStyle = v === 0 ? palette.pathA : palette.pathB;
-      ctx.fillRect(pathLeft.x + x, pathLeft.y + y, TILE, TILE);
+  for (let y = 0; y < WORLD.bridge.h; y += TILE) {
+    for (let x = 0; x < WORLD.bridge.w; x += TILE) {
+      drawTile(7, bridge.x + x, bridge.y + y);
     }
   }
 
-  const pathRight = toScreen(1240, 705);
-  for (let x = 0; x < 840; x += TILE) {
-    for (let y = 0; y < 42; y += TILE) {
-      const v = ((x / TILE) + (y / TILE)) % 2;
-      ctx.fillStyle = v === 0 ? palette.pathA : palette.pathB;
-      ctx.fillRect(pathRight.x + x, pathRight.y + y, TILE, TILE);
+  const pathZones = [
+    { x: 120, y: 705, w: 860, h: 42 },
+    { x: 1240, y: 705, w: 840, h: 42 },
+  ];
+  pathZones.forEach((zone) => {
+    const p = toScreen(zone.x, zone.y);
+    for (let y = 0; y < zone.h; y += TILE) {
+      for (let x = 0; x < zone.w; x += TILE) {
+        const v = ((x / TILE) + (y / TILE)) % 2;
+        drawTile(v === 0 ? 3 : 4, p.x + x, p.y + y);
+      }
     }
-  }
+  });
 
   for (let i = 0; i < 8; i += 1) {
     const tx = 140 + i * 240;
     const ty = i % 2 === 0 ? 380 : 980;
     const p = toScreen(tx, ty);
-    ctx.fillStyle = palette.treeTrunk;
-    ctx.fillRect(p.x + 7, p.y + 12, 8, 14);
-    ctx.fillStyle = palette.treeLeafB;
-    ctx.fillRect(p.x, p.y, 22, 16);
-    ctx.fillStyle = palette.treeLeafA;
-    ctx.fillRect(p.x + 3, p.y + 3, 16, 10);
+    drawTile(8, p.x + 3, p.y + 10);
+    drawTile(9 + (i % 2), p.x, p.y);
   }
 }
 
-function drawUnicorn(x, y, body, mane, outline, facingLeft, walkFrame) {
-  const p = toScreen(x, y);
-  const dir = facingLeft ? -1 : 1;
-  const legOffset = walkFrame ? 1 : 0;
-
-  ctx.fillStyle = outline;
-  ctx.fillRect(p.x + 2, p.y + 4, 10, 8);
-  ctx.fillRect(p.x + 10, p.y + 5, 5, 5);
-  ctx.fillRect(p.x + 3, p.y + 11 + legOffset, 2, 5 - legOffset);
-  ctx.fillRect(p.x + 7, p.y + 11 + (1 - legOffset), 2, 5 - (1 - legOffset));
-
-  ctx.fillStyle = body;
-  ctx.fillRect(p.x + 3, p.y + 5, 8, 7);
-  ctx.fillRect(p.x + 10, p.y + 6, 4, 4);
-  ctx.fillRect(p.x + 3, p.y + 12, 1, 3);
-  ctx.fillRect(p.x + 7, p.y + 12, 1, 3);
-
-  ctx.fillStyle = mane;
-  if (dir > 0) {
-    ctx.fillRect(p.x + 2, p.y + 6, 2, 5);
-    ctx.fillRect(p.x + 10, p.y + 4, 3, 2);
-  } else {
-    ctx.fillRect(p.x + 9, p.y + 6, 2, 5);
-    ctx.fillRect(p.x + 10, p.y + 4, 3, 2);
-  }
-
-  ctx.fillStyle = "#ffe270";
-  if (dir > 0) {
-    ctx.fillRect(p.x + 13, p.y + 4, 1, 3);
-  } else {
-    ctx.fillRect(p.x + 10, p.y + 4, 1, 3);
-  }
+function drawCharacter(sprite, worldX, worldY, frame) {
+  const p = toScreen(worldX, worldY);
+  ctx.drawImage(sprite, frame * TILE, 0, TILE, TILE, p.x, p.y, TILE, TILE);
 }
 
 function drawEntities() {
-  drawUnicorn(WORLD.npc.x, WORLD.npc.y, "#f7f7ff", "#ff9bd4", "#2a2a38", true, 0);
-
-  const facingLeft = player.face === "left";
-  const mane = player.face === "up" ? "#79e7ff" : "#ff77c4";
-  drawUnicorn(player.x, player.y, "#ffffff", mane, "#2a2a38", facingLeft, player.animFrame);
+  drawCharacter(assets.npc, WORLD.npc.x, WORLD.npc.y, 0);
+  drawCharacter(assets.player, player.x, player.y, player.animFrame);
 }
 
 function drawPrompt() {
   if (!nearNpc() || dialogue.active) return;
 
   const pos = toScreen(WORLD.npc.x + 22, WORLD.npc.y - 10);
-  ctx.fillStyle = "#101320";
-  ctx.fillRect(pos.x, pos.y, 56, 14);
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(pos.x, pos.y, 56, 14);
+  drawNineSlice(assets.panel, pos.x, pos.y, 56, 14, 4);
   ctx.fillStyle = "#ff9ad1";
   ctx.font = "6px 'Press Start 2P', monospace";
   ctx.fillText("SPACE", pos.x + 6, pos.y + 9);
+}
+
+function drawNineSlice(img, x, y, w, h, b) {
+  const s = img.width;
+  const c = b;
+  const mW = s - c * 2;
+  const mH = s - c * 2;
+
+  ctx.drawImage(img, 0, 0, c, c, x, y, c, c);
+  ctx.drawImage(img, s - c, 0, c, c, x + w - c, y, c, c);
+  ctx.drawImage(img, 0, s - c, c, c, x, y + h - c, c, c);
+  ctx.drawImage(img, s - c, s - c, c, c, x + w - c, y + h - c, c, c);
+
+  ctx.drawImage(img, c, 0, mW, c, x + c, y, w - c * 2, c);
+  ctx.drawImage(img, c, s - c, mW, c, x + c, y + h - c, w - c * 2, c);
+  ctx.drawImage(img, 0, c, c, mH, x, y + c, c, h - c * 2);
+  ctx.drawImage(img, s - c, c, c, mH, x + w - c, y + c, c, h - c * 2);
+  ctx.drawImage(img, c, c, mW, mH, x + c, y + c, w - c * 2, h - c * 2);
 }
 
 function draw() {
@@ -449,6 +445,86 @@ function draw() {
   drawWorld();
   drawEntities();
   drawPrompt();
+  drawUiText();
+}
+
+function drawGlyph(ch, x, y, color, scale = 2) {
+  const upper = ch.toUpperCase();
+  const index = fontAtlas.chars.indexOf(upper);
+  if (index < 0) return;
+  const sx = (index % fontAtlas.cols) * fontAtlas.glyphW;
+  const sy = Math.floor(index / fontAtlas.cols) * fontAtlas.glyphH;
+
+  textCtx.drawImage(
+    assets.font,
+    sx,
+    sy,
+    fontAtlas.glyphW,
+    fontAtlas.glyphH,
+    x,
+    y,
+    fontAtlas.glyphW * scale,
+    fontAtlas.glyphH * scale,
+  );
+
+  if (color) {
+    textCtx.globalCompositeOperation = "source-atop";
+    textCtx.fillStyle = color;
+    textCtx.fillRect(x, y, fontAtlas.glyphW * scale, fontAtlas.glyphH * scale);
+    textCtx.globalCompositeOperation = "source-over";
+  }
+}
+
+function drawBitmapText(text, x, y, color = "#ffffff", scale = 2) {
+  let cursor = 0;
+  for (const ch of text) {
+    drawGlyph(ch, x + cursor, y, color, scale);
+    cursor += fontAtlas.glyphW * scale;
+  }
+}
+
+function wrapText(text, maxChars) {
+  const words = text.split(" ");
+  const lines = [];
+  let line = "";
+  words.forEach((word) => {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+
+function drawBlockText(selector, color = "#ffffff", scale = 2, maxLines = 6) {
+  document.querySelectorAll(selector).forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
+    const lineHeight = fontAtlas.glyphH * scale + 2;
+    const maxChars = Math.max(1, Math.floor(rect.width / (fontAtlas.glyphW * scale)));
+    const lines = wrapText((el.textContent || "").trim(), maxChars).slice(0, maxLines);
+    lines.forEach((line, i) => {
+      drawBitmapText(line, Math.floor(rect.left), Math.floor(rect.top + i * lineHeight), color, scale);
+    });
+  });
+}
+
+function drawUiText() {
+  textCtx.clearRect(0, 0, viewW, viewH);
+  drawBlockText(".stats h1", "#ff9ad1", 2, 1);
+  drawBlockText(".stats p", "#ffffff", 2, 1);
+  drawBlockText(".title", "#ffffff", 2, 1);
+  drawBlockText(".mini-map", "#ffffff", 2, 1);
+  drawBlockText(".menu p", "#ffffff", 2, 1);
+  drawBlockText(".speaker", "#ff9ad1", 2, 1);
+  drawBlockText(".text", "#ffffff", 2, 3);
+  drawBlockText(".choices-title", "#ffffff", 2, 1);
+  drawBlockText(".choice-item", "#ffffff", 2, 1);
+  drawBlockText(".action", "#ffffff", 2, 1);
 }
 
 function update(dt) {
@@ -474,7 +550,6 @@ function loop(ts) {
   update(dt);
   draw();
   clearPressedFrame();
-
   requestAnimationFrame(loop);
 }
 
@@ -573,6 +648,11 @@ window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
 window.addEventListener("resize", resize);
 
-resize();
-updateCamera();
-requestAnimationFrame(loop);
+async function start() {
+  await loadAssets();
+  resize();
+  updateCamera();
+  requestAnimationFrame(loop);
+}
+
+start();
