@@ -63,3 +63,8 @@
 - Estado: acordada.
 - Decisión: abrir rama dedicada y construir vertical slice equivalente en Godot para evaluar calidad/velocidad frente al prototipo web.
 - Motivo: validar si Godot acelera construcción de RPG 2D estilo Zelda manteniendo arquitectura modular propia.
+
+### D-012 — Build de Pages basado en export web de Godot
+- Estado: acordada.
+- Decisión: cuando exista `apps/godot-player/project.godot`, el pipeline de Pages debe exportar Web desde Godot; en caso contrario, usar build estático web existente.
+- Motivo: necesitamos previsualización remota en Pages también para el spike Godot sin romper el flujo actual.

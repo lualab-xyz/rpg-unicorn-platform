@@ -75,7 +75,10 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - `apps/godot-player/scripts/world_renderer.gd`
 - Assets raster copiados desde web prototype a `apps/godot-player/assets`.
 - Slice portado: movimiento jugador, río colisionable con puente cruzable, NPC y diálogo con elecciones, soporte teclado + touch pad, layout móvil básico.
-- Limitación del entorno actual: no hay ejecutable `godot` instalado, por lo que no se pudo correr/verificar aquí.
+- Godot instalado localmente para validación: `4.6.2.stable` en `/workspace/tools/godot/Godot_v4.6.2-stable_linux.x86_64`.
+- Validación headless completada tras corregir parse errors de `world_renderer.gd`.
+- Export web preparado con `apps/godot-player/export_presets.cfg`.
+- Workflow de Pages actualizado para exportar Godot Web cuando exista proyecto Godot.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

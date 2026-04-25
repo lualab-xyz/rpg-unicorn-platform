@@ -54,4 +54,7 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Portar sprites raster del prototipo web al spike Godot.
 - [x] Implementar vertical slice en Godot (mover, colisión río/puente, NPC, diálogo).
 - [x] Añadir base de controles móvil y layout responsive en HUD Godot.
-- [ ] Validar ejecución local en entorno con binario Godot disponible.
+- [x] Instalar Godot localmente en el entorno y validar carga headless del proyecto.
+- [x] Añadir preset de export web en Godot (`export_presets.cfg`).
+- [x] Adaptar GitHub Actions para exportar Godot Web a Pages cuando exista `apps/godot-player`.
+- [ ] Ejecutar deploy de Pages del spike Godot y validar resultado publicado.

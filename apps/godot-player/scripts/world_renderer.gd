@@ -42,7 +42,13 @@ func _tile_region(tile_index: int) -> Rect2:
 
 
 func _draw_tile(tile_index: int, pos: Vector2) -> void:
-    draw_texture_rect_region(tileset, Rect2(pos, Vector2(TILE, TILE)), _tile_region(tile_index), false)
+    draw_texture_rect_region(
+        tileset,
+        Rect2(pos, Vector2(TILE, TILE)),
+        _tile_region(tile_index),
+        Color(1, 1, 1, 1),
+        false,
+    )
 
 
 func _draw_ground(cam_pos: Vector2, viewport: Vector2) -> void:
@@ -84,7 +90,8 @@ func _draw_paths(cam_pos: Vector2, _viewport: Vector2) -> void:
         Rect2(120, 705, 860, 42),
         Rect2(1240, 705, 840, 42),
     ]
-    for zone in zones:
+    for zone_data in zones:
+        var zone := zone_data as Rect2
         var px := zone.position.x - cam_pos.x
         var py := zone.position.y - cam_pos.y
         for y in range(0, int(zone.size.y), TILE):
