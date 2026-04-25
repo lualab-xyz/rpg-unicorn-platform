@@ -1,0 +1,32 @@
+# PLAN
+
+Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
+
+- [x] Crear repositorio local en `/workspace/rpg-unicorn-platform`.
+  - Comentario: repositorio inicializado con rama `main`.
+- [x] Crear ramas base `dev` y `feature/bootstrap-base`.
+  - Comentario: trabajo activo en `feature/bootstrap-base`.
+- [x] Crear `AGENTS.md` con reglas de ramas y contexto del agente.
+- [x] Crear `AGENT_CONTEXT/STATE.md` como memoria operativa persistente.
+- [x] Crear `AGENT_CONTEXT/PLAN.md` con pasos y estado de ejecución.
+- [x] Crear carpeta `AGENT_CONTEXT/` y preparar `TASK.md` para validación del usuario.
+  - Comentario: creado borrador de `TASK.md`, marcado como pendiente de confirmación.
+- [x] Actualizar `AGENTS.md` con política de documentación (`README.md` y `docs/`).
+  - Comentario: añadida regla de no mezclar contexto conversacional con documentación del proyecto y confirmación previa para nuevos archivos en `docs/`.
+- [x] Mover `PLAN.md` y `STATE.md` a `AGENT_CONTEXT/`.
+  - Comentario: ubicaciones activas: `AGENT_CONTEXT/PLAN.md` y `AGENT_CONTEXT/STATE.md`.
+- [x] Actualizar `AGENTS.md` para reflejar que `PLAN` y `STATE` viven en `AGENT_CONTEXT/`.
+- [x] Crear repositorio remoto en GitHub org `lualab-xyz`.
+  - Comentario: creado `lualab-xyz/rpg-unicorn-platform` (privado).
+- [x] Conectar repositorio local con `origin` remoto.
+  - Comentario: remoto configurado a `https://github.com/lualab-xyz/rpg-unicorn-platform.git`.
+- [x] Definir regla de nuevo contexto técnico en `AGENT_CONTEXT/DECISIONS.md`.
+  - Comentario: actualizado `AGENTS.md` para requerir revisión de decisiones antes de nuevas decisiones técnicas.
+- [x] Crear documentación base de proyecto sin mezclar contexto operativo.
+  - Comentario: creados `README.md`, `docs/project-objective.md` y `docs/architecture.md` con responsabilidades separadas.
+- [x] Cambiar a rama `feature/task-01-prototipo-motor` para la primera task de gameplay.
+- [x] Implementar app web mínima en pantalla completa con HUD 8-bit básica.
+- [x] Implementar movimiento del unicornio con teclado y pad táctil mobile-first.
+- [x] Implementar colisión del río y paso permitido por puente.
+- [x] Implementar interacción con NPC + diálogo breve con elecciones estilo Zelda.
+- [ ] Probar manualmente en navegador y ajustar jugabilidad base.

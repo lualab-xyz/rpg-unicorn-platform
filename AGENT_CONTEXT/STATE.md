@@ -1,0 +1,51 @@
+# STATE
+
+Última actualización: 2026-04-25
+
+## Contexto del repositorio
+- Repositorio local inicializado en: `/workspace/rpg-unicorn-platform`.
+- Rama actual de trabajo: `feature/task-01-prototipo-motor`.
+- Rama de integración prevista: `dev`.
+- Política acordada: trabajo en `feature/*` y merge a `dev` solo con confirmación del usuario.
+- Repositorio remoto creado: `https://github.com/lualab-xyz/rpg-unicorn-platform`.
+- Remoto local `origin` enlazado al repositorio de GitHub.
+
+## Objetivo general del proyecto
+Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (inspiración Zelda), con separación clara entre motor reutilizable y juego de ejemplo (`unicorn-mvp`), orientado a web (desktop/móvil) con posible despliegue como PWA/app.
+
+## Decisiones ya tomadas
+- Evitar lock-in de herramientas externas.
+- Formatos canónicos abiertos para runtime y contenido (datos + assets estándar).
+- Herramientas externas (p. ej. Tiled/Aseprite) tratadas como opcionales de productividad, no como dependencia obligatoria.
+- Separar estrictamente documentación operativa del agente y documentación del proyecto.
+- `README.md` reservado para contenido básico de repositorio, sin contexto de conversación.
+- Nuevos archivos en `docs/` solo tras confirmación del usuario.
+- Añadir `AGENT_CONTEXT/DECISIONS.md` para registrar acuerdos técnicos y revisarlo antes de nuevas decisiones técnicas.
+
+## Archivos de control del agente
+- `AGENTS.md` creado con reglas de ramas y contexto.
+- `AGENT_CONTEXT/PLAN.md` creado para seguimiento de la task activa.
+- `AGENT_CONTEXT/STATE.md` como memoria operativa activa.
+- `AGENT_CONTEXT/TASK.md` creado como borrador pendiente de confirmación.
+- `AGENT_CONTEXT/DECISIONS.md` creado con acuerdos técnicos activos.
+
+## Documentación del proyecto disponible
+- `README.md`: resumen corto del repositorio.
+- `docs/project-objective.md`: objetivo, contexto, alcance y acuerdos principales.
+- `docs/architecture.md`: guía técnica de arquitectura y límites entre capas.
+
+## Implementación en progreso
+- Prototipo jugable inicial creado en `apps/web-player/index.html`.
+- Estilos HUD/mobile y layout fullscreen en `apps/web-player/style.css`.
+- Lógica jugable en `apps/web-player/game.js`:
+  - movimiento jugador por teclado y pad táctil,
+  - río con colisión,
+  - puente cruzable,
+  - interacción con NPC cercano,
+  - diálogo con elecciones,
+  - modo diálogo bloquea movimiento y usa flechas para seleccionar.
+
+## Próximos pasos recomendados
+1. Crear estructura base de carpetas (`packages`, `games`, `apps`, `AGENT_CONTEXT`).
+2. Definir contrato v1 de formato canónico (mapa, sprite metadata, npc, warps/triggers).
+3. Crear `AGENT_CONTEXT/TASK.md` con la task activa tras confirmación del usuario.

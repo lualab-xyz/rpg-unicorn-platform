@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Unicorn MVP Prototype</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="game-root">
+      <canvas id="game-canvas" aria-label="Game canvas"></canvas>
+
+      <header class="hud-top">
+        <section class="panel stats">
+          <h1>LUNA</h1>
+          <p>HP 28/28</p>
+          <p>MP 12/12</p>
+        </section>
+        <section class="panel title">REINO UNICORNIO</section>
+        <section class="panel mini-map">MAPA MVP</section>
+      </header>
+
+      <aside class="hud-left panel menu">
+        <p>INVENTARIO</p>
+        <p>HABILIDADES</p>
+        <p>MAGIA</p>
+        <p>MISIONES</p>
+      </aside>
+
+      <section class="dialog panel" id="dialog-box" hidden>
+        <p class="speaker" id="dialog-speaker">PRINCESA CELESTIA</p>
+        <p class="text" id="dialog-text"></p>
+      </section>
+
+      <section class="choices panel" id="choices-box" hidden>
+        <p class="choices-title">RESPONDER</p>
+        <div id="choices-list"></div>
+      </section>
+
+      <section class="controls">
+        <div class="touch-pad" id="touch-pad" aria-label="Touch movement pad">
+          <div class="pad-knob" id="pad-knob"></div>
+        </div>
+
+        <div class="actions" id="actions">
+          <button id="btn-talk" class="action" hidden>Hablar</button>
+          <button id="btn-select" class="action" hidden>Elegir</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
