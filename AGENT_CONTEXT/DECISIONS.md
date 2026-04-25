@@ -58,3 +58,8 @@
 - Estado: acordada.
 - Decisión: en móvil, HUD superior en modo carrusel (con navegación) y diálogo/choices reposicionados para no solaparse con controles; mantener reglas de paginación por capacidad real de caracteres/lineas.
 - Motivo: evitar textos apelotonados y solapamiento con pad, garantizando consistencia entre desktop y móvil.
+
+### D-011 — Spike de migración visual a Godot
+- Estado: acordada.
+- Decisión: abrir rama dedicada y construir vertical slice equivalente en Godot para evaluar calidad/velocidad frente al prototipo web.
+- Motivo: validar si Godot acelera construcción de RPG 2D estilo Zelda manteniendo arquitectura modular propia.

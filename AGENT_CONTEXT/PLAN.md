@@ -1,6 +1,6 @@
 # PLAN
 
-Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
+Task actual: Spike Godot para port visual/jugable del prototipo.
 
 - [x] Crear repositorio local en `/workspace/rpg-unicorn-platform`.
   - Comentario: repositorio inicializado con rama `main`.
@@ -49,3 +49,9 @@ Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
 - [x] Aplicar estilo 8-bit también al pad y elementos de control táctil.
 - [x] Añadir cálculo de capacidad de texto por contenedor (chars/lineas) para paginación consistente.
 - [ ] Publicar ajustes de legibilidad/UX y validar en móvil/escritorio.
+- [x] Crear rama `feature/spike-godot-visual-port` para experimentar con Godot.
+- [x] Crear estructura base de proyecto Godot en `apps/godot-player`.
+- [x] Portar sprites raster del prototipo web al spike Godot.
+- [x] Implementar vertical slice en Godot (mover, colisión río/puente, NPC, diálogo).
+- [x] Añadir base de controles móvil y layout responsive en HUD Godot.
+- [ ] Validar ejecución local en entorno con binario Godot disponible.

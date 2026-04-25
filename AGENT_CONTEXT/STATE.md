@@ -4,7 +4,7 @@
 
 ## Contexto del repositorio
 - Repositorio local inicializado en: `/workspace/rpg-unicorn-platform`.
-- Rama actual de trabajo: `feature/task-01-prototipo-motor`.
+- Rama actual de trabajo: `feature/spike-godot-visual-port`.
 - Rama de integración prevista: `dev`.
 - Política acordada: trabajo en `feature/*` y merge a `dev` solo con confirmación del usuario.
 - Repositorio remoto creado: `https://github.com/lualab-xyz/rpg-unicorn-platform`.
@@ -63,6 +63,19 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - diálogo y opciones reposicionados en móvil para no pisarse con controles,
   - pad táctil migrado a aspecto 8-bit raster,
   - función de capacidad de texto por contenedor para controlar impresión/paginación base.
+
+## Spike Godot (nuevo)
+- Proyecto base creado en `apps/godot-player`.
+- Estructura inicial:
+  - `apps/godot-player/project.godot`
+  - `apps/godot-player/scenes/main.tscn`
+  - `apps/godot-player/scenes/player.tscn`
+  - `apps/godot-player/scripts/main.gd`
+  - `apps/godot-player/scripts/player.gd`
+  - `apps/godot-player/scripts/world_renderer.gd`
+- Assets raster copiados desde web prototype a `apps/godot-player/assets`.
+- Slice portado: movimiento jugador, río colisionable con puente cruzable, NPC y diálogo con elecciones, soporte teclado + touch pad, layout móvil básico.
+- Limitación del entorno actual: no hay ejecutable `godot` instalado, por lo que no se pudo correr/verificar aquí.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
