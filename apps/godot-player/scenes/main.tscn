@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_6boco"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_53uk5"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/unicorn_npc.png" id="4_vpshl"]
 [ext_resource type="Texture2D" path="res://assets/ui/panel-9slice.png" id="5_panel"]
 [ext_resource type="Texture2D" path="res://assets/ui/button-9slice.png" id="6_button"]
+[ext_resource type="FontFile" path="res://assets/ui/PressStart2P-Regular.ttf" id="7_font"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_river_top"]
 size = Vector2(260, 520)
@@ -26,6 +27,16 @@ texture_margin_left = 4.0
 texture_margin_top = 4.0
 texture_margin_right = 4.0
 texture_margin_bottom = 4.0
+
+[sub_resource type="Theme" id="Theme_ui"]
+default_font = ExtResource("7_font")
+default_font_size = 9
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/constants/outline_size = 1
+Label/colors/font_outline_color = Color(0, 0, 0, 1)
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/constants/outline_size = 1
+Button/colors/font_outline_color = Color(0, 0, 0, 1)
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_6boco")
@@ -67,6 +78,7 @@ limit_right = 2200
 limit_bottom = 1400
 
 [node name="HUD" type="CanvasLayer" parent="."]
+layer = 1
 
 [node name="TopStats" type="Panel" parent="HUD"]
 offset_left = 8.0
@@ -74,6 +86,7 @@ offset_top = 8.0
 offset_right = 108.0
 offset_bottom = 66.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="Label" type="Label" parent="HUD/TopStats"]
 offset_left = 8.0
@@ -88,6 +101,7 @@ offset_top = 8.0
 offset_right = 214.0
 offset_bottom = 40.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="Label" type="Label" parent="HUD/TopTitle"]
 offset_left = 8.0
@@ -102,6 +116,7 @@ offset_top = 8.0
 offset_right = 312.0
 offset_bottom = 40.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="HudNav" type="Panel" parent="HUD"]
 offset_left = 8.0
@@ -110,6 +125,7 @@ offset_right = 112.0
 offset_bottom = 92.0
 visible = false
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="Prev" type="Button" parent="HUD/HudNav"]
 offset_left = 6.0
@@ -144,6 +160,7 @@ offset_top = 180.0
 offset_right = 312.0
 offset_bottom = 248.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="Speaker" type="Label" parent="HUD/DialogPanel"]
 offset_left = 8.0
@@ -151,6 +168,7 @@ offset_top = 8.0
 offset_right = 184.0
 offset_bottom = 20.0
 text = "AURORA"
+modulate = Color(1, 0.603922, 0.819608, 1)
 
 [node name="Text" type="Label" parent="HUD/DialogPanel"]
 offset_left = 8.0
@@ -166,6 +184,7 @@ offset_top = 126.0
 offset_right = 312.0
 offset_bottom = 176.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme = SubResource("Theme_ui")
 
 [node name="Choices" type="Label" parent="HUD/ChoicesPanel"]
 offset_left = 8.0
@@ -181,6 +200,7 @@ offset_right = 104.0
 offset_bottom = 300.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_button")
+theme = SubResource("Theme_ui")
 
 [node name="Knob" type="Panel" parent="HUD/TouchPad"]
 offset_left = 44.0
@@ -188,6 +208,14 @@ offset_top = 44.0
 offset_right = 68.0
 offset_bottom = 68.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_button")
+
+[node name="PadLabel" type="Label" parent="HUD/TouchPad"]
+offset_left = 20.0
+offset_top = 72.0
+offset_right = 74.0
+offset_bottom = 90.0
+text = "MOVE"
+horizontal_alignment = 1
 
 [node name="Actions" type="Control" parent="HUD"]
 offset_left = 220.0
@@ -204,6 +232,7 @@ text = "HABLAR"
 theme_override_styles/normal = SubResource("StyleBoxTexture_button")
 theme_override_styles/hover = SubResource("StyleBoxTexture_button")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_button")
+theme = SubResource("Theme_ui")
 
 [node name="Select" type="Button" parent="HUD/Actions"]
 offset_left = 4.0
@@ -214,3 +243,4 @@ text = "ELEGIR"
 theme_override_styles/normal = SubResource("StyleBoxTexture_button")
 theme_override_styles/hover = SubResource("StyleBoxTexture_button")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_button")
+theme = SubResource("Theme_ui")

@@ -57,4 +57,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Instalar Godot localmente en el entorno y validar carga headless del proyecto.
 - [x] Añadir preset de export web en Godot (`export_presets.cfg`).
 - [x] Adaptar GitHub Actions para exportar Godot Web a Pages cuando exista `apps/godot-player`.
-- [ ] Ejecutar deploy de Pages del spike Godot y validar resultado publicado.
+- [x] Ejecutar deploy de Pages del spike Godot y validar resultado publicado.
+- [x] Ajustar spike Godot tras feedback visual (font retro, pad móvil visible, color de fondo).
+- [x] Preparar shell Web custom para reemplazar loading por defecto de Godot.

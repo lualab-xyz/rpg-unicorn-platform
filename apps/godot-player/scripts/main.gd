@@ -18,6 +18,9 @@ extends Node2D
 @onready var hud_nav: Panel = $HUD/HudNav
 @onready var hud_prev: Button = $HUD/HudNav/Prev
 @onready var hud_next: Button = $HUD/HudNav/Next
+@onready var top_stats_label: Label = $HUD/TopStats/Label
+@onready var top_title_label: Label = $HUD/TopTitle/Label
+@onready var top_map_label: Label = $HUD/TopMap/Label
 
 var touch_axis := Vector2.ZERO
 var touch_active := false
@@ -65,6 +68,7 @@ func _ready() -> void:
     btn_select.pressed.connect(_on_select_pressed)
     hud_prev.pressed.connect(_on_hud_prev)
     hud_next.pressed.connect(_on_hud_next)
+    _refresh_top_labels()
 
 
 func _notification(what: int) -> void:
@@ -249,6 +253,9 @@ func _sync_mobile_layout() -> void:
         btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
         btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
 
+    touch_pad.visible = mobile
+    _refresh_top_labels()
+
 
 func _input(event: InputEvent) -> void:
     if event is InputEventScreenTouch:
@@ -295,3 +302,9 @@ func _on_hud_prev() -> void:
 func _on_hud_next() -> void:
     hud_index = posmod(hud_index + 1, 3)
     _sync_mobile_layout()
+
+
+func _refresh_top_labels() -> void:
+    top_stats_label.text = "LUNA\nHP 28/28\nMP 12/12"
+    top_title_label.text = "REINO MVP"
+    top_map_label.text = "MAPA"

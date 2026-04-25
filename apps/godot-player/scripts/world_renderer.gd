@@ -25,6 +25,7 @@ func _draw() -> void:
     if cam:
         cam_pos = cam.global_position - viewport * 0.5
 
+    _draw_background(viewport)
     _draw_ground(cam_pos, viewport)
     _draw_river(cam_pos, viewport)
     _draw_bridge(cam_pos, viewport)
@@ -49,6 +50,10 @@ func _draw_tile(tile_index: int, pos: Vector2) -> void:
         Color(1, 1, 1, 1),
         false,
     )
+
+
+func _draw_background(viewport: Vector2) -> void:
+    draw_rect(Rect2(Vector2.ZERO, viewport), Color(0.53, 0.78, 1.0, 1.0), true)
 
 
 func _draw_ground(cam_pos: Vector2, viewport: Vector2) -> void:

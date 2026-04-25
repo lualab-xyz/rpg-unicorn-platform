@@ -79,6 +79,12 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - Validación headless completada tras corregir parse errors de `world_renderer.gd`.
 - Export web preparado con `apps/godot-player/export_presets.cfg`.
 - Workflow de Pages actualizado para exportar Godot Web cuando exista proyecto Godot.
+- Deploy de Pages Godot validado tras corregir reglas de environment y pasos de export CI.
+- Ajustes aplicados tras feedback:
+  - fuente retro integrada (`PressStart2P-Regular.ttf`) en HUD Godot,
+  - pad táctil visible en móvil,
+  - cielo/fondo corregido para evitar look gris,
+  - shell web custom para reemplazar loader inicial por branding del proyecto.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

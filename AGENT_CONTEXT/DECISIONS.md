@@ -68,3 +68,8 @@
 - Estado: acordada.
 - Decisión: cuando exista `apps/godot-player/project.godot`, el pipeline de Pages debe exportar Web desde Godot; en caso contrario, usar build estático web existente.
 - Motivo: necesitamos previsualización remota en Pages también para el spike Godot sin romper el flujo actual.
+
+### D-013 — UX visual mínima obligatoria del spike Godot
+- Estado: acordada.
+- Decisión: mantener en Godot los elementos clave del look MVP (fuente retro, pad móvil visible, paleta del mundo coherente, loader web personalizado).
+- Motivo: durante el port no se deben perder señales visuales fundamentales del estilo 8-bit objetivo.
