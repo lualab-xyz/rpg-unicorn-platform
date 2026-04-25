@@ -66,3 +66,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Verificar si la build con loader por defecto de Godot elimina el congelado.
 - [x] Corregir visibilidad del pad móvil en spike Godot.
 - [x] Corregir tono del césped en render Godot para evitar look gris.
+- [x] Corregir offset doble de render en Godot (mundo vs cámara) para alinear visual/collisions.
+- [x] Ajustar detección de modo móvil en Web para mostrar pad en pantallas táctiles/tablet.

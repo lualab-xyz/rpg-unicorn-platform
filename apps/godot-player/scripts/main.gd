@@ -78,6 +78,14 @@ func _ready() -> void:
     _refresh_top_labels()
 
 
+func _is_mobile_ui() -> bool:
+    if DisplayServer.is_touchscreen_available():
+        return true
+    if OS.has_feature("web") and DisplayServer.window_get_size().x <= 1024:
+        return true
+    return false
+
+
 func _notification(what: int) -> void:
     if what == NOTIFICATION_WM_SIZE_CHANGED:
         _sync_mobile_layout()
@@ -91,7 +99,7 @@ func _physics_process(_delta: float) -> void:
     var can_talk := _near_npc()
     btn_talk.visible = can_talk and not dialogue_active
     btn_select.visible = dialogue_active
-    touch_pad.visible = DisplayServer.window_get_size().x < 720 and not dialogue_active
+    touch_pad.visible = _is_mobile_ui() and not dialogue_active
 
     if not dialogue_active and can_talk and Input.is_action_just_pressed("ui_accept"):
         _start_dialogue()
@@ -158,7 +166,7 @@ func _render_dialogue() -> void:
 func _fit_dialog_text(full_text: String) -> String:
     var chars_per_line := 38
     var max_lines := 3
-    if DisplayServer.window_get_size().x < 720:
+    if _is_mobile_ui():
         chars_per_line = 28
         max_lines = 3
 
@@ -224,7 +232,7 @@ func _on_select_pressed() -> void:
 
 
 func _sync_mobile_layout() -> void:
-    var mobile := DisplayServer.window_get_size().x < 720
+    var mobile := _is_mobile_ui()
     var hud_panels := [top_stats, top_title, top_map]
     hud_nav.visible = mobile
     for i in range(hud_panels.size()):
@@ -293,7 +301,7 @@ func _input(event: InputEvent) -> void:
             _update_touch_axis(drag.position)
     elif event is InputEventKey:
         var k := event as InputEventKey
-        if DisplayServer.window_get_size().x < 720 and k.pressed and not k.echo:
+        if _is_mobile_ui() and k.pressed and not k.echo:
             if k.physical_keycode == KEY_Q:
                 hud_index = posmod(hud_index - 1, 3)
                 _sync_mobile_layout()

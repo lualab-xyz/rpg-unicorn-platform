@@ -91,6 +91,8 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - Ajustes posteriores:
   - pad táctil reforzado y recolocado para móvil,
   - color base de césped forzado a paleta verde para eliminar apariencia gris.
+- Corrección crítica aplicada: en `world_renderer.gd` se eliminó sustracción manual de cámara (Node2D + Camera2D ya hacen transform), corrigiendo desalineación visual con colisiones del río/puente y aparición parcial del césped.
+- Ajuste de detección móvil: pad se activa por touch capability y en web para anchos <= 1024 (evita falso desktop en tablets).
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
