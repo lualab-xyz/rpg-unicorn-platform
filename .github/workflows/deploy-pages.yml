@@ -48,8 +48,10 @@ jobs:
       - name: Build Godot web export
         if: ${{ hashFiles('apps/godot-player/project.godot') != '' }}
         run: |
-          mkdir -p dist
+          mkdir -p apps/godot-player/dist
           godot --headless --path apps/godot-player --export-release Web dist/index.html
+          mkdir -p dist
+          cp -R apps/godot-player/dist/* dist/
 
       - name: Add fallback index for Godot assets
         if: ${{ hashFiles('apps/godot-player/project.godot') != '' }}
