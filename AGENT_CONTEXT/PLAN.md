@@ -63,4 +63,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Corregir bloqueo en loader web desactivando requisito COOP/COEP en shell Pages.
 - [ ] Revalidar carga completa del build Godot en navegador final.
 - [x] Deshabilitar temporalmente custom shell para aislar incidencia de carga en Pages.
-- [ ] Verificar si la build con loader por defecto de Godot elimina el congelado.
+- [x] Verificar si la build con loader por defecto de Godot elimina el congelado.
+- [x] Corregir visibilidad del pad móvil en spike Godot.
+- [x] Corregir tono del césped en render Godot para evitar look gris.

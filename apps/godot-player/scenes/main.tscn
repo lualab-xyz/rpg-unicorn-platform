@@ -201,6 +201,7 @@ offset_bottom = 300.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_button")
 theme = SubResource("Theme_ui")
+modulate = Color(1, 1, 1, 0.95)
 
 [node name="Knob" type="Panel" parent="HUD/TouchPad"]
 offset_left = 44.0
@@ -208,6 +209,7 @@ offset_top = 44.0
 offset_right = 68.0
 offset_bottom = 68.0
 theme_override_styles/panel = SubResource("StyleBoxTexture_button")
+modulate = Color(1, 0.8, 0.93, 1)
 
 [node name="PadLabel" type="Label" parent="HUD/TouchPad"]
 offset_left = 20.0
@@ -216,6 +218,7 @@ offset_right = 74.0
 offset_bottom = 90.0
 text = "MOVE"
 horizontal_alignment = 1
+modulate = Color(1, 1, 1, 1)
 
 [node name="Actions" type="Control" parent="HUD"]
 offset_left = 220.0

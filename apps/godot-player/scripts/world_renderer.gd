@@ -67,7 +67,8 @@ func _draw_ground(cam_pos: Vector2, viewport: Vector2) -> void:
             var sx := x - cam_pos.x
             var sy := y - cam_pos.y
             var check := int(x / TILE + y / TILE) % 2
-            _draw_tile(0 if check == 0 else 1, Vector2(sx, sy))
+            var c := Color(0.47, 0.82, 0.42, 1.0) if check == 0 else Color(0.41, 0.74, 0.37, 1.0)
+            draw_rect(Rect2(Vector2(sx, sy), Vector2(TILE, TILE)), c, true)
             if int((x / TILE) * 13 + (y / TILE) * 7) % 29 == 0:
                 _draw_tile(2, Vector2(sx, sy))
 

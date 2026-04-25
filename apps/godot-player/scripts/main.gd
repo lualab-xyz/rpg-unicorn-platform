@@ -10,6 +10,7 @@ extends Node2D
 @onready var choices_label: Label = $HUD/ChoicesPanel/Choices
 @onready var touch_pad: Control = $HUD/TouchPad
 @onready var pad_knob: Panel = $HUD/TouchPad/Knob
+@onready var pad_label: Label = $HUD/TouchPad/PadLabel
 @onready var btn_talk: Button = $HUD/Actions/Talk
 @onready var btn_select: Button = $HUD/Actions/Select
 @onready var top_stats: Panel = $HUD/TopStats
@@ -68,6 +69,12 @@ func _ready() -> void:
     btn_select.pressed.connect(_on_select_pressed)
     hud_prev.pressed.connect(_on_hud_prev)
     hud_next.pressed.connect(_on_hud_next)
+    touch_pad.mouse_filter = Control.MOUSE_FILTER_STOP
+    pad_knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    pad_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    touch_pad.modulate = Color(1, 1, 1, 0.95)
+    pad_knob.modulate = Color(1, 0.8, 0.93, 1)
+    pad_label.modulate = Color(1, 1, 1, 1)
     _refresh_top_labels()
 
 
@@ -84,6 +91,7 @@ func _physics_process(_delta: float) -> void:
     var can_talk := _near_npc()
     btn_talk.visible = can_talk and not dialogue_active
     btn_select.visible = dialogue_active
+    touch_pad.visible = DisplayServer.window_get_size().x < 720 and not dialogue_active
 
     if not dialogue_active and can_talk and Input.is_action_just_pressed("ui_accept"):
         _start_dialogue()
@@ -235,7 +243,12 @@ func _sync_mobile_layout() -> void:
         dialog_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 68)
         choices_panel.position = Vector2(8, 146)
         choices_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 54)
-        touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 120)
+        touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 126)
+        touch_pad.size = Vector2(112, 112)
+        pad_knob.position = Vector2(42, 42)
+        pad_knob.size = Vector2(30, 30)
+        pad_label.position = Vector2(14, 84)
+        pad_label.size = Vector2(84, 18)
         btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
         btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
     else:
@@ -250,10 +263,15 @@ func _sync_mobile_layout() -> void:
         choices_panel.position = Vector2(DisplayServer.window_get_size().x - 140, DisplayServer.window_get_size().y - 160)
         choices_panel.size = Vector2(132, 72)
         touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 120)
+        touch_pad.size = Vector2(96, 96)
+        pad_knob.position = Vector2(36, 36)
+        pad_knob.size = Vector2(24, 24)
+        pad_label.position = Vector2(18, 70)
+        pad_label.size = Vector2(64, 18)
         btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
         btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
 
-    touch_pad.visible = mobile
+    touch_pad.visible = mobile and not dialogue_active
     _refresh_top_labels()
 
 
@@ -268,7 +286,7 @@ func _input(event: InputEvent) -> void:
             touch_active = false
             touch_axis = Vector2.ZERO
             touch_id = -1
-            pad_knob.position = Vector2(44, 44)
+            pad_knob.position = Vector2((touch_pad.size.x - pad_knob.size.x) * 0.5, (touch_pad.size.y - pad_knob.size.y) * 0.5)
     elif event is InputEventScreenDrag:
         var drag := event as InputEventScreenDrag
         if touch_active and drag.index == touch_id:
@@ -287,11 +305,12 @@ func _input(event: InputEvent) -> void:
 func _update_touch_axis(point: Vector2) -> void:
     var center := touch_pad.global_position + touch_pad.size * 0.5
     var d := point - center
-    var axis := d / 48.0
+    var axis := d / 42.0
     axis.x = clamp(axis.x, -1.0, 1.0)
     axis.y = clamp(axis.y, -1.0, 1.0)
     touch_axis = axis
-    pad_knob.position = Vector2(44, 44) + Vector2(axis.x * 24.0, axis.y * 24.0)
+    var base := Vector2((touch_pad.size.x - pad_knob.size.x) * 0.5, (touch_pad.size.y - pad_knob.size.y) * 0.5)
+    pad_knob.position = base + Vector2(axis.x * 22.0, axis.y * 22.0)
 
 
 func _on_hud_prev() -> void:
