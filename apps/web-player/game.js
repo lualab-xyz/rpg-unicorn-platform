@@ -13,6 +13,11 @@ const touchPad = document.getElementById("touch-pad");
 const padKnob = document.getElementById("pad-knob");
 const btnTalk = document.getElementById("btn-talk");
 const btnSelect = document.getElementById("btn-select");
+const hudTop = document.querySelector(".hud-top");
+const hudPanels = Array.from(document.querySelectorAll(".hud-top .panel"));
+const hudNav = document.getElementById("hud-nav");
+const hudPrev = document.getElementById("hud-prev");
+const hudNext = document.getElementById("hud-next");
 
 const TILE = 16;
 const WORLD = {
@@ -104,6 +109,7 @@ let viewportScale = 1;
 let viewportWidthWorld = 0;
 let viewportHeightWorld = 0;
 let lastTime = 0;
+let activeHudPanelIndex = 0;
 
 function loadAssets() {
   const files = [
@@ -152,6 +158,23 @@ function resize() {
   textCanvas.style.height = `${viewH}px`;
   textCtx.setTransform(dprText, 0, 0, dprText, 0, 0);
   textCtx.imageSmoothingEnabled = false;
+
+  updateHudCarousel();
+  renderDialogue();
+}
+
+function isMobileHudMode() {
+  return window.innerWidth <= 720;
+}
+
+function updateHudCarousel() {
+  const mobile = isMobileHudMode();
+  if (!hudNav) return;
+  hudNav.hidden = !mobile;
+  hudPanels.forEach((panel, idx) => {
+    const active = !mobile || idx === activeHudPanelIndex;
+    panel.classList.toggle("is-active", active);
+  });
 }
 
 function clamp(v, min, max) {
@@ -199,8 +222,9 @@ function renderDialogue() {
   }
 
   const node = dialogue.tree[dialogue.nodeId];
+  const wrapped = paginateText(node.text, dialogText);
   dialogSpeaker.textContent = node.speaker;
-  dialogText.textContent = node.text;
+  dialogText.textContent = wrapped.visible;
   dialogBox.hidden = false;
   choicesBox.hidden = false;
 
@@ -211,6 +235,22 @@ function renderDialogue() {
     el.textContent = `${index === dialogue.selectedIndex ? "> " : "  "}${choice.text}`;
     choicesList.appendChild(el);
   });
+}
+
+function paginateText(text, el) {
+  if (!el) return { visible: text, hasMore: false };
+  const scale = 2;
+  const charPx = fontAtlas.glyphW * scale;
+  const linePx = fontAtlas.glyphH * scale + 2;
+  const rect = el.getBoundingClientRect();
+  const maxChars = Math.max(8, Math.floor(rect.width / charPx));
+  const maxLines = Math.max(2, Math.floor(rect.height / linePx));
+  const lines = wrapText((text || "").trim(), maxChars);
+  const visibleLines = lines.slice(0, maxLines);
+  return {
+    visible: visibleLines.join(" "),
+    hasMore: lines.length > maxLines,
+  };
 }
 
 function chooseCurrentDialogueOption() {
@@ -416,9 +456,7 @@ function drawPrompt() {
 
   const pos = toScreen(WORLD.npc.x + 22, WORLD.npc.y - 10);
   drawNineSlice(assets.panel, pos.x, pos.y, 56, 14, 4);
-  ctx.fillStyle = "#ff9ad1";
-  ctx.font = "6px 'Press Start 2P', monospace";
-  ctx.fillText("SPACE", pos.x + 6, pos.y + 9);
+  drawBitmapText("SPACE", pos.x + 6, pos.y + 3, "#ff9ad1", 1);
 }
 
 function drawNineSlice(img, x, y, w, h, b) {
@@ -525,6 +563,7 @@ function drawUiText() {
   drawBlockText(".choices-title", "#ffffff", 2, 1);
   drawBlockText(".choice-item", "#ffffff", 2, 1);
   drawBlockText(".action", "#ffffff", 2, 1);
+  drawBlockText(".hud-nav-btn", "#ffffff", 2, 1);
 }
 
 function update(dt) {
@@ -643,6 +682,20 @@ btnSelect.addEventListener("click", () => {
     chooseCurrentDialogueOption();
   }
 });
+
+if (hudPrev) {
+  hudPrev.addEventListener("click", () => {
+    activeHudPanelIndex = (activeHudPanelIndex - 1 + hudPanels.length) % hudPanels.length;
+    updateHudCarousel();
+  });
+}
+
+if (hudNext) {
+  hudNext.addEventListener("click", () => {
+    activeHudPanelIndex = (activeHudPanelIndex + 1) % hudPanels.length;
+    updateHudCarousel();
+  });
+}
 
 window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);

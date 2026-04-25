@@ -80,6 +80,10 @@ body {
   pointer-events: none;
 }
 
+.hud-nav {
+  display: none;
+}
+
 .hud-top .panel {
   min-height: 72px;
 }
@@ -118,7 +122,7 @@ body {
   position: fixed;
   left: 8px;
   right: 8px;
-  bottom: 110px;
+  bottom: 150px;
   min-height: 90px;
 }
 
@@ -129,7 +133,7 @@ body {
 .choices {
   position: fixed;
   right: 8px;
-  bottom: 110px;
+  bottom: 150px;
   width: 40vw;
   max-width: 320px;
 }
@@ -148,7 +152,7 @@ body {
   position: fixed;
   left: 12px;
   right: 12px;
-  bottom: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -158,18 +162,22 @@ body {
 .touch-pad {
   width: 120px;
   height: 120px;
-  border-radius: 50%;
-  border: 3px solid var(--panel-border);
-  background: rgba(16, 19, 32, 0.8);
+  border: 4px solid transparent;
+  border-image-source: url("./assets/ui/button-9slice.png");
+  border-image-slice: 4 fill;
+  border-image-width: 4px;
+  border-image-repeat: stretch;
   position: relative;
 }
 
 .pad-knob {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 3px solid var(--panel-border);
-  background: var(--panel-accent);
+  width: 32px;
+  height: 32px;
+  border: 4px solid transparent;
+  border-image-source: url("./assets/ui/button-9slice.png");
+  border-image-slice: 4 fill;
+  border-image-width: 4px;
+  border-image-repeat: stretch;
   position: absolute;
   left: 50%;
   top: 50%;
@@ -216,5 +224,83 @@ body {
   .dialog,
   .choices {
     bottom: 18px;
+  }
+}
+
+@media (max-width: 720px) {
+  .hud-top {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-top .panel {
+    display: none;
+    min-height: 58px;
+  }
+
+  .hud-top .panel.is-active {
+    display: block;
+  }
+
+  .hud-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    pointer-events: auto;
+  }
+
+  .hud-nav-btn {
+    width: 34px;
+    height: 26px;
+    border: 4px solid transparent;
+    border-image-source: url("./assets/ui/button-9slice.png");
+    border-image-slice: 4 fill;
+    border-image-width: 4px;
+    border-image-repeat: stretch;
+    color: transparent;
+    font: inherit;
+    padding: 0;
+  }
+
+  .hud-left {
+    display: none;
+  }
+
+  .dialog {
+    left: 8px;
+    right: 8px;
+    bottom: 176px;
+    min-height: 92px;
+  }
+
+  .choices {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+    bottom: 102px;
+  }
+
+  .controls {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    align-items: flex-end;
+  }
+
+  .touch-pad {
+    width: 112px;
+    height: 112px;
+  }
+
+  .pad-knob {
+    width: 28px;
+    height: 28px;
+  }
+
+  .actions {
+    min-width: 112px;
+  }
+
+  .action {
+    min-width: 112px;
+    padding: 8px;
   }
 }

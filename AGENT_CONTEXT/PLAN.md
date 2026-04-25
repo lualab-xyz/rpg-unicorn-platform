@@ -43,3 +43,9 @@ Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
 - [x] Integrar sprites PNG en render del mundo y personajes.
 - [x] Integrar marcos de UI raster (9-slice) y texto bitmap sobre HUD/diálogo.
 - [ ] Publicar ajustes raster y validar percepción retro en Pages.
+- [x] Registrar decisión de UX móvil para evitar solapamientos y densidad de texto.
+- [x] Implementar carrusel de paneles superiores en móvil con navegación por flechas.
+- [x] Reposicionar diálogo/choices en móvil para no ser pisados por el pad.
+- [x] Aplicar estilo 8-bit también al pad y elementos de control táctil.
+- [x] Añadir cálculo de capacidad de texto por contenedor (chars/lineas) para paginación consistente.
+- [ ] Publicar ajustes de legibilidad/UX y validar en móvil/escritorio.

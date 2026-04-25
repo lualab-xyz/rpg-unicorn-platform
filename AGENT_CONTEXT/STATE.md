@@ -58,6 +58,11 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - personajes desde `assets/sprites/unicorn_player.png` y `assets/sprites/unicorn_npc.png`,
   - paneles y botones UI con 9-slice PNG,
   - texto bitmap con atlas `assets/ui/font-6x8.png` renderizado en capa dedicada.
+- Ajustes de legibilidad/UX en curso:
+  - carrusel móvil para paneles superiores con navegación lateral,
+  - diálogo y opciones reposicionados en móvil para no pisarse con controles,
+  - pad táctil migrado a aspecto 8-bit raster,
+  - función de capacidad de texto por contenedor para controlar impresión/paginación base.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

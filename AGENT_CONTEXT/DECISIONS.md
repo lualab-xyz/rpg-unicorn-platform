@@ -53,3 +53,8 @@
 - Estado: acordada.
 - Decisión: usar PNGs para tiles, personajes y marcos de UI; evitar trazos vectoriales para conseguir estética RPG retro real.
 - Motivo: la percepción visual seguía siendo vectorial y no cumplía con la validación de estilo 8-bit solicitada.
+
+### D-010 — UX móvil consistente para HUD y diálogo
+- Estado: acordada.
+- Decisión: en móvil, HUD superior en modo carrusel (con navegación) y diálogo/choices reposicionados para no solaparse con controles; mantener reglas de paginación por capacidad real de caracteres/lineas.
+- Motivo: evitar textos apelotonados y solapamiento con pad, garantizando consistencia entre desktop y móvil.
