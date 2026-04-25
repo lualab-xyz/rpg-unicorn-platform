@@ -43,3 +43,8 @@
 - Estado: acordada.
 - Decisión: iniciar con guardado local en navegador y diseñar abstracción para backend futuro.
 - Motivo: entregar MVP rápido y evitar deuda técnica al migrar a sincronización remota.
+
+### D-008 — Validación visual estilo 8-bit real
+- Estado: acordada.
+- Decisión: priorizar look&feel pixel-art (tile look, escala entera, sprites pixelados, animación por frames discretos) sobre estética vectorial.
+- Motivo: la siguiente validación del prototipo exige parecer un juego 8-bit y no una demo geométrica libre.

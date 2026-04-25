@@ -9,6 +9,7 @@
 - Política acordada: trabajo en `feature/*` y merge a `dev` solo con confirmación del usuario.
 - Repositorio remoto creado: `https://github.com/lualab-xyz/rpg-unicorn-platform`.
 - Remoto local `origin` enlazado al repositorio de GitHub.
+- Push realizado de la rama `feature/task-01-prototipo-motor` con commit inicial del prototipo.
 
 ## Objetivo general del proyecto
 Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (inspiración Zelda), con separación clara entre motor reutilizable y juego de ejemplo (`unicorn-mvp`), orientado a web (desktop/móvil) con posible despliegue como PWA/app.
@@ -21,6 +22,7 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - `README.md` reservado para contenido básico de repositorio, sin contexto de conversación.
 - Nuevos archivos en `docs/` solo tras confirmación del usuario.
 - Añadir `AGENT_CONTEXT/DECISIONS.md` para registrar acuerdos técnicos y revisarlo antes de nuevas decisiones técnicas.
+- Priorizar validación visual 8-bit real (pixel-art y movimiento retro) en la siguiente iteración.
 
 ## Archivos de control del agente
 - `AGENTS.md` creado con reglas de ramas y contexto.
@@ -44,6 +46,18 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - interacción con NPC cercano,
   - diálogo con elecciones,
   - modo diálogo bloquea movimiento y usa flechas para seleccionar.
+- Iteración visual 8-bit aplicada (pendiente de validar en Pages):
+  - viewport con escala entera pixelada,
+  - tiles de suelo/agua/camino con paleta limitada,
+  - sprites simplificados por píxel para unicornio,
+  - animación de caminata por alternancia de frames discretos,
+  - overlay scanline suave para estética CRT ligera.
+
+## Publicación remota
+- Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
+- Pages habilitado tras cambio de repositorio a público.
+- Despliegue ejecutado con éxito vía workflow `Deploy Web Player to Pages`.
+- URL activa de preview: `http://lualab.xyz/rpg-unicorn-platform/`.
 
 ## Próximos pasos recomendados
 1. Crear estructura base de carpetas (`packages`, `games`, `apps`, `AGENT_CONTEXT`).

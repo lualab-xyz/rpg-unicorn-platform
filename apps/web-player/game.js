@@ -12,21 +12,41 @@ const padKnob = document.getElementById("pad-knob");
 const btnTalk = document.getElementById("btn-talk");
 const btnSelect = document.getElementById("btn-select");
 
+const TILE = 16;
+const palette = {
+  grassA: "#79d26b",
+  grassB: "#69bc5d",
+  grassFlower: "#fce8ff",
+  pathA: "#e3c088",
+  pathB: "#d2ab73",
+  waterA: "#4f95e8",
+  waterB: "#2d6fc2",
+  waterFoam: "#8fd0ff",
+  bridgeA: "#ad7d4d",
+  bridgeB: "#7c5330",
+  bridgeEdge: "#593721",
+  treeTrunk: "#5a3b24",
+  treeLeafA: "#b08dff",
+  treeLeafB: "#8f6de2",
+};
+
 const WORLD = {
   width: 2200,
   height: 1400,
   river: { x: 980, y: 120, w: 260, h: 1160 },
   bridge: { x: 940, y: 640, w: 340, h: 110 },
-  npc: { x: 1460, y: 700, w: 30, h: 34, name: "AURORA" },
+  npc: { x: 1460, y: 700, w: TILE, h: TILE, name: "AURORA" },
 };
 
 const player = {
   x: 760,
   y: 700,
-  w: 30,
-  h: 34,
-  speed: 240,
+  w: TILE,
+  h: TILE,
+  speed: 6 * TILE,
   face: "down",
+  animTick: 0,
+  animFrame: 0,
 };
 
 const input = {
@@ -34,8 +54,6 @@ const input = {
   right: false,
   up: false,
   down: false,
-  interact: false,
-  select: false,
   touch: { active: false, dx: 0, dy: 0, id: null },
 };
 
@@ -70,18 +88,38 @@ const dialogue = {
   },
 };
 
+const pressedThisFrame = {
+  up: false,
+  down: false,
+  select: false,
+  interact: false,
+};
+
 const camera = { x: 0, y: 0 };
 
 let viewW = 0;
 let viewH = 0;
+let viewportScale = 1;
+let viewportWidthWorld = 0;
+let viewportHeightWorld = 0;
 let lastTime = 0;
 
 function resize() {
   const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-  canvas.width = Math.floor(window.innerWidth * dpr);
-  canvas.height = Math.floor(window.innerHeight * dpr);
+  const targetWorldWidth = Math.min(320, Math.floor(window.innerWidth / 2));
+  viewportScale = Math.max(2, Math.floor(window.innerWidth / targetWorldWidth));
+  viewportWidthWorld = Math.max(256, Math.floor(window.innerWidth / viewportScale));
+  viewportHeightWorld = Math.max(144, Math.floor(window.innerHeight / viewportScale));
+
+  canvas.width = Math.floor(viewportWidthWorld * dpr);
+  canvas.height = Math.floor(viewportHeightWorld * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = false;
+
+  canvas.style.width = `${viewportWidthWorld * viewportScale}px`;
+  canvas.style.height = `${viewportHeightWorld * viewportScale}px`;
+  canvas.style.margin = "0 auto";
+
   viewW = window.innerWidth;
   viewH = window.innerHeight;
 }
@@ -133,7 +171,6 @@ function renderDialogue() {
   const node = dialogue.tree[dialogue.nodeId];
   dialogSpeaker.textContent = node.speaker;
   dialogText.textContent = node.text;
-
   dialogBox.hidden = false;
   choicesBox.hidden = false;
 
@@ -147,14 +184,10 @@ function renderDialogue() {
 }
 
 function chooseCurrentDialogueOption() {
-  if (!dialogue.active || !dialogue.nodeId) {
-    return;
-  }
+  if (!dialogue.active || !dialogue.nodeId) return;
   const node = dialogue.tree[dialogue.nodeId];
   const option = node.choices[dialogue.selectedIndex];
-  if (!option) {
-    return;
-  }
+  if (!option) return;
   if (!option.next) {
     stopDialogue();
     return;
@@ -166,9 +199,7 @@ function chooseCurrentDialogueOption() {
 
 function processDialogueInput() {
   const node = dialogue.tree[dialogue.nodeId];
-  if (!node) {
-    return;
-  }
+  if (!node) return;
 
   if (pressedThisFrame.up) {
     dialogue.selectedIndex = (dialogue.selectedIndex - 1 + node.choices.length) % node.choices.length;
@@ -183,13 +214,6 @@ function processDialogueInput() {
   }
 }
 
-const pressedThisFrame = {
-  up: false,
-  down: false,
-  select: false,
-  interact: false,
-};
-
 function clearPressedFrame() {
   pressedThisFrame.up = false;
   pressedThisFrame.down = false;
@@ -198,13 +222,10 @@ function clearPressedFrame() {
 }
 
 function movementIntent() {
-  if (dialogue.active) {
-    return { x: 0, y: 0 };
-  }
+  if (dialogue.active) return { x: 0, y: 0 };
 
   let x = 0;
   let y = 0;
-
   if (input.left) x -= 1;
   if (input.right) x += 1;
   if (input.up) y -= 1;
@@ -223,13 +244,13 @@ function movementIntent() {
     x /= len;
     y /= len;
   }
-
   return { x, y };
 }
 
 function updatePlayer(dt) {
   const intent = movementIntent();
   const step = player.speed * dt;
+  const moving = Math.abs(intent.x) > 0.001 || Math.abs(intent.y) > 0.001;
 
   if (Math.abs(intent.x) > Math.abs(intent.y)) {
     player.face = intent.x < 0 ? "left" : intent.x > 0 ? "right" : player.face;
@@ -237,26 +258,25 @@ function updatePlayer(dt) {
     player.face = intent.y < 0 ? "up" : "down";
   }
 
-  const nextX = {
-    x: player.x + intent.x * step,
-    y: player.y,
-    w: player.w,
-    h: player.h,
-  };
-
-  if (!inRiver(nextX)) {
-    player.x = clamp(nextX.x, 0, WORLD.width - player.w);
+  if (moving) {
+    player.animTick += dt;
+    if (player.animTick >= 0.16) {
+      player.animTick = 0;
+      player.animFrame = (player.animFrame + 1) % 2;
+    }
+  } else {
+    player.animTick = 0;
+    player.animFrame = 0;
   }
 
-  const nextY = {
-    x: player.x,
-    y: player.y + intent.y * step,
-    w: player.w,
-    h: player.h,
-  };
+  const nextX = { x: player.x + intent.x * step, y: player.y, w: player.w, h: player.h };
+  if (!inRiver(nextX)) {
+    player.x = clamp(Math.round(nextX.x), 0, WORLD.width - player.w);
+  }
 
+  const nextY = { x: player.x, y: player.y + intent.y * step, w: player.w, h: player.h };
   if (!inRiver(nextY)) {
-    player.y = clamp(nextY.y, 0, WORLD.height - player.h);
+    player.y = clamp(Math.round(nextY.y), 0, WORLD.height - player.h);
   }
 }
 
@@ -269,8 +289,16 @@ function nearNpc() {
 }
 
 function updateCamera() {
-  camera.x = clamp(player.x + player.w / 2 - viewW / 2, 0, WORLD.width - viewW);
-  camera.y = clamp(player.y + player.h / 2 - viewH / 2, 0, WORLD.height - viewH);
+  camera.x = clamp(
+    Math.round(player.x + player.w / 2 - viewportWidthWorld / 2),
+    0,
+    WORLD.width - viewportWidthWorld,
+  );
+  camera.y = clamp(
+    Math.round(player.y + player.h / 2 - viewportHeightWorld / 2),
+    0,
+    WORLD.height - viewportHeightWorld,
+  );
 }
 
 function toScreen(wx, wy) {
@@ -278,114 +306,145 @@ function toScreen(wx, wy) {
 }
 
 function drawGround() {
-  ctx.fillStyle = "#7ad173";
-  ctx.fillRect(0, 0, viewW, viewH);
+  ctx.fillStyle = palette.grassA;
+  ctx.fillRect(0, 0, viewportWidthWorld, viewportHeightWorld);
 
-  for (let y = 0; y < viewH; y += 40) {
-    for (let x = (y / 2) % 20; x < viewW; x += 40) {
-      ctx.fillStyle = "#8add80";
-      ctx.fillRect(x, y, 5, 5);
+  const startX = Math.floor(camera.x / TILE) * TILE;
+  const startY = Math.floor(camera.y / TILE) * TILE;
+  const endX = camera.x + viewportWidthWorld + TILE;
+  const endY = camera.y + viewportHeightWorld + TILE;
+
+  for (let y = startY; y < endY; y += TILE) {
+    for (let x = startX; x < endX; x += TILE) {
+      const sx = x - camera.x;
+      const sy = y - camera.y;
+      const v = ((x / TILE) + (y / TILE)) % 2;
+      ctx.fillStyle = v === 0 ? palette.grassA : palette.grassB;
+      ctx.fillRect(sx, sy, TILE, TILE);
+      if (((x / TILE) * 13 + (y / TILE) * 7) % 29 === 0) {
+        ctx.fillStyle = palette.grassFlower;
+        ctx.fillRect(sx + 6, sy + 6, 3, 3);
+      }
     }
   }
 }
 
 function drawWorld() {
   const river = toScreen(WORLD.river.x, WORLD.river.y);
-  ctx.fillStyle = "#4ea4ff";
+  ctx.fillStyle = palette.waterA;
   ctx.fillRect(river.x, river.y, WORLD.river.w, WORLD.river.h);
 
-  const waveOffset = Math.floor((performance.now() / 120) % 22);
-  for (let y = 0; y < WORLD.river.h; y += 26) {
-    ctx.fillStyle = "#7dc6ff";
-    ctx.fillRect(river.x + waveOffset, river.y + y, WORLD.river.w - 30, 5);
-    ctx.fillStyle = "#2a7de0";
-    ctx.fillRect(river.x + 12, river.y + y + 10, WORLD.river.w - 24, 4);
+  const phase = Math.floor(performance.now() / 220) % 2;
+  for (let y = 0; y < WORLD.river.h; y += TILE) {
+    for (let x = 0; x < WORLD.river.w; x += TILE) {
+      const v = ((x / TILE) + (y / TILE) + phase) % 2;
+      ctx.fillStyle = v === 0 ? palette.waterA : palette.waterB;
+      ctx.fillRect(river.x + x, river.y + y, TILE, TILE);
+    }
+    ctx.fillStyle = palette.waterFoam;
+    ctx.fillRect(river.x + ((y / TILE + phase) % 2) * 8, river.y + y + 2, WORLD.river.w - 8, 2);
   }
 
   const bridge = toScreen(WORLD.bridge.x, WORLD.bridge.y);
-  ctx.fillStyle = "#a57547";
+  ctx.fillStyle = palette.bridgeA;
   ctx.fillRect(bridge.x, bridge.y, WORLD.bridge.w, WORLD.bridge.h);
-  ctx.fillStyle = "#6f4a2a";
-  for (let x = 0; x < WORLD.bridge.w; x += 22) {
-    ctx.fillRect(bridge.x + x, bridge.y + 8, 8, WORLD.bridge.h - 16);
+  ctx.fillStyle = palette.bridgeB;
+  for (let x = 0; x < WORLD.bridge.w; x += TILE) {
+    ctx.fillRect(bridge.x + x, bridge.y + 2, TILE - 2, WORLD.bridge.h - 4);
+  }
+  ctx.fillStyle = palette.bridgeEdge;
+  ctx.fillRect(bridge.x, bridge.y, WORLD.bridge.w, 2);
+  ctx.fillRect(bridge.x, bridge.y + WORLD.bridge.h - 2, WORLD.bridge.w, 2);
+
+  const pathLeft = toScreen(120, 705);
+  for (let x = 0; x < 860; x += TILE) {
+    for (let y = 0; y < 42; y += TILE) {
+      const v = ((x / TILE) + (y / TILE)) % 2;
+      ctx.fillStyle = v === 0 ? palette.pathA : palette.pathB;
+      ctx.fillRect(pathLeft.x + x, pathLeft.y + y, TILE, TILE);
+    }
   }
 
-  ctx.fillStyle = "#eacb94";
-  const pathLeft = toScreen(120, 705);
-  ctx.fillRect(pathLeft.x, pathLeft.y, 860, 42);
   const pathRight = toScreen(1240, 705);
-  ctx.fillRect(pathRight.x, pathRight.y, 840, 42);
+  for (let x = 0; x < 840; x += TILE) {
+    for (let y = 0; y < 42; y += TILE) {
+      const v = ((x / TILE) + (y / TILE)) % 2;
+      ctx.fillStyle = v === 0 ? palette.pathA : palette.pathB;
+      ctx.fillRect(pathRight.x + x, pathRight.y + y, TILE, TILE);
+    }
+  }
 
-  ctx.fillStyle = "#af86ff";
   for (let i = 0; i < 8; i += 1) {
     const tx = 140 + i * 240;
     const ty = i % 2 === 0 ? 380 : 980;
     const p = toScreen(tx, ty);
-    ctx.fillRect(p.x, p.y, 22, 38);
-    ctx.fillStyle = "#d2b0ff";
-    ctx.fillRect(p.x - 10, p.y - 24, 42, 26);
-    ctx.fillStyle = "#af86ff";
+    ctx.fillStyle = palette.treeTrunk;
+    ctx.fillRect(p.x + 7, p.y + 12, 8, 14);
+    ctx.fillStyle = palette.treeLeafB;
+    ctx.fillRect(p.x, p.y, 22, 16);
+    ctx.fillStyle = palette.treeLeafA;
+    ctx.fillRect(p.x + 3, p.y + 3, 16, 10);
   }
 }
 
-function drawUnicorn(x, y, body, mane, outline, facingLeft) {
+function drawUnicorn(x, y, body, mane, outline, facingLeft, walkFrame) {
   const p = toScreen(x, y);
   const dir = facingLeft ? -1 : 1;
+  const legOffset = walkFrame ? 1 : 0;
 
   ctx.fillStyle = outline;
-  ctx.fillRect(p.x + 6, p.y + 6, 18, 18);
-  ctx.fillRect(p.x + 20, p.y + 8, 10, 10);
-  ctx.fillRect(p.x + 8, p.y + 20, 4, 10);
-  ctx.fillRect(p.x + 18, p.y + 20, 4, 10);
+  ctx.fillRect(p.x + 2, p.y + 4, 10, 8);
+  ctx.fillRect(p.x + 10, p.y + 5, 5, 5);
+  ctx.fillRect(p.x + 3, p.y + 11 + legOffset, 2, 5 - legOffset);
+  ctx.fillRect(p.x + 7, p.y + 11 + (1 - legOffset), 2, 5 - (1 - legOffset));
 
   ctx.fillStyle = body;
-  ctx.fillRect(p.x + 7, p.y + 7, 16, 16);
-  ctx.fillRect(p.x + 21, p.y + 9, 8, 8);
-  ctx.fillRect(p.x + 9, p.y + 21, 3, 8);
-  ctx.fillRect(p.x + 18, p.y + 21, 3, 8);
+  ctx.fillRect(p.x + 3, p.y + 5, 8, 7);
+  ctx.fillRect(p.x + 10, p.y + 6, 4, 4);
+  ctx.fillRect(p.x + 3, p.y + 12, 1, 3);
+  ctx.fillRect(p.x + 7, p.y + 12, 1, 3);
 
   ctx.fillStyle = mane;
   if (dir > 0) {
-    ctx.fillRect(p.x + 6, p.y + 9, 4, 10);
-    ctx.fillRect(p.x + 21, p.y + 5, 6, 3);
+    ctx.fillRect(p.x + 2, p.y + 6, 2, 5);
+    ctx.fillRect(p.x + 10, p.y + 4, 3, 2);
   } else {
-    ctx.fillRect(p.x + 20, p.y + 9, 4, 10);
-    ctx.fillRect(p.x + 22, p.y + 5, 6, 3);
+    ctx.fillRect(p.x + 9, p.y + 6, 2, 5);
+    ctx.fillRect(p.x + 10, p.y + 4, 3, 2);
   }
 
   ctx.fillStyle = "#ffe270";
   if (dir > 0) {
-    ctx.fillRect(p.x + 26, p.y + 4, 2, 6);
+    ctx.fillRect(p.x + 13, p.y + 4, 1, 3);
   } else {
-    ctx.fillRect(p.x + 22, p.y + 4, 2, 6);
+    ctx.fillRect(p.x + 10, p.y + 4, 1, 3);
   }
 }
 
 function drawEntities() {
-  drawUnicorn(WORLD.npc.x, WORLD.npc.y, "#f7f7ff", "#ff9bd4", "#2a2a38", true);
+  drawUnicorn(WORLD.npc.x, WORLD.npc.y, "#f7f7ff", "#ff9bd4", "#2a2a38", true, 0);
 
   const facingLeft = player.face === "left";
   const mane = player.face === "up" ? "#79e7ff" : "#ff77c4";
-  drawUnicorn(player.x, player.y, "#ffffff", mane, "#2a2a38", facingLeft);
+  drawUnicorn(player.x, player.y, "#ffffff", mane, "#2a2a38", facingLeft, player.animFrame);
 }
 
 function drawPrompt() {
-  if (!nearNpc() || dialogue.active) {
-    return;
-  }
-  const pos = toScreen(WORLD.npc.x + 34, WORLD.npc.y - 12);
+  if (!nearNpc() || dialogue.active) return;
+
+  const pos = toScreen(WORLD.npc.x + 22, WORLD.npc.y - 10);
   ctx.fillStyle = "#101320";
-  ctx.fillRect(pos.x, pos.y, 72, 24);
+  ctx.fillRect(pos.x, pos.y, 56, 14);
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(pos.x, pos.y, 72, 24);
+  ctx.lineWidth = 1;
+  ctx.strokeRect(pos.x, pos.y, 56, 14);
   ctx.fillStyle = "#ff9ad1";
-  ctx.font = "10px 'Press Start 2P', monospace";
-  ctx.fillText("ESPACIO", pos.x + 6, pos.y + 16);
+  ctx.font = "6px 'Press Start 2P', monospace";
+  ctx.fillText("SPACE", pos.x + 6, pos.y + 9);
 }
 
 function draw() {
-  ctx.clearRect(0, 0, viewW, viewH);
+  ctx.clearRect(0, 0, viewportWidthWorld, viewportHeightWorld);
   drawGround();
   drawWorld();
   drawEntities();
@@ -408,9 +467,7 @@ function update(dt) {
 }
 
 function loop(ts) {
-  if (!lastTime) {
-    lastTime = ts;
-  }
+  if (!lastTime) lastTime = ts;
   const dt = Math.min((ts - lastTime) / 1000, 0.04);
   lastTime = ts;
 
@@ -487,9 +544,7 @@ touchPad.addEventListener("pointerdown", (e) => {
 });
 
 touchPad.addEventListener("pointermove", (e) => {
-  if (!input.touch.active || input.touch.id !== e.pointerId) {
-    return;
-  }
+  if (!input.touch.active || input.touch.id !== e.pointerId) return;
   const vec = touchVectorFromEvent(e);
   input.touch.dx = vec.nx;
   input.touch.dy = vec.ny;
@@ -497,9 +552,7 @@ touchPad.addEventListener("pointermove", (e) => {
 });
 
 touchPad.addEventListener("pointerup", (e) => {
-  if (input.touch.id === e.pointerId) {
-    resetTouchPad();
-  }
+  if (input.touch.id === e.pointerId) resetTouchPad();
 });
 
 touchPad.addEventListener("pointercancel", resetTouchPad);

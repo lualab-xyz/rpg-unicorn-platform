@@ -32,6 +32,7 @@ body {
 #game-root {
   position: fixed;
   inset: 0;
+  background: #000;
 }
 
 #game-canvas {
@@ -39,6 +40,20 @@ body {
   height: 100vh;
   display: block;
   image-rendering: pixelated;
+}
+
+#game-root::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
 }
 
 .panel {
@@ -169,6 +184,10 @@ body {
   background: #0f1f32;
   border: 3px solid var(--panel-border);
   padding: 10px;
+}
+
+.action:active {
+  transform: translate(1px, 1px);
 }
 
 @media (min-width: 900px) {

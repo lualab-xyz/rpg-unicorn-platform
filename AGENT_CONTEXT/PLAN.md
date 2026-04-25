@@ -29,4 +29,13 @@ Task actual: Prototipo jugable #1 (movimiento, puente y diálogo).
 - [x] Implementar movimiento del unicornio con teclado y pad táctil mobile-first.
 - [x] Implementar colisión del río y paso permitido por puente.
 - [x] Implementar interacción con NPC + diálogo breve con elecciones estilo Zelda.
-- [ ] Probar manualmente en navegador y ajustar jugabilidad base.
+- [x] Publicar rama de trabajo al remoto para validación externa.
+  - Comentario: push de `feature/task-01-prototipo-motor` completado.
+- [x] Habilitar publicación en GitHub Pages para previsualización remota.
+  - Comentario: completado tras hacer público el repositorio y habilitar Pages con build type workflow.
+- [x] Ejecutar despliegue de Pages y verificar disponibilidad remota.
+  - Comentario: workflow `Deploy Web Player to Pages` finalizó en success, URL activa.
+- [x] Registrar decisión de validación visual 8-bit en `AGENT_CONTEXT/DECISIONS.md`.
+- [x] Migrar render del prototipo a estética 8-bit (tiles, paleta limitada y pixel scale).
+- [x] Cambiar movimiento y animación a estilo más retro (paso discreto por frames).
+- [ ] Publicar ajustes visuales y validar percepción 8-bit en Pages.
