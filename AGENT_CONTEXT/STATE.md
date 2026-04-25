@@ -86,6 +86,7 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - cielo/fondo corregido para evitar look gris,
   - shell web custom para reemplazar loader inicial por branding del proyecto.
 - Fix adicional aplicado en shell web: `ensureCrossOriginIsolationHeaders = false` para evitar bloqueo en Pages (sin headers COOP/COEP dedicados).
+- Dado que persiste congelado según validación del usuario, se deshabilita temporalmente `custom_html_shell` para comparar con loader estándar de Godot.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

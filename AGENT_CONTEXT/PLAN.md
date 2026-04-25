@@ -62,3 +62,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Preparar shell Web custom para reemplazar loading por defecto de Godot.
 - [x] Corregir bloqueo en loader web desactivando requisito COOP/COEP en shell Pages.
 - [ ] Revalidar carga completa del build Godot en navegador final.
+- [x] Deshabilitar temporalmente custom shell para aislar incidencia de carga en Pages.
+- [ ] Verificar si la build con loader por defecto de Godot elimina el congelado.
