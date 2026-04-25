@@ -60,3 +60,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Ejecutar deploy de Pages del spike Godot y validar resultado publicado.
 - [x] Ajustar spike Godot tras feedback visual (font retro, pad móvil visible, color de fondo).
 - [x] Preparar shell Web custom para reemplazar loading por defecto de Godot.
+- [x] Corregir bloqueo en loader web desactivando requisito COOP/COEP en shell Pages.
+- [ ] Revalidar carga completa del build Godot en navegador final.

@@ -85,6 +85,7 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - pad táctil visible en móvil,
   - cielo/fondo corregido para evitar look gris,
   - shell web custom para reemplazar loader inicial por branding del proyecto.
+- Fix adicional aplicado en shell web: `ensureCrossOriginIsolationHeaders = false` para evitar bloqueo en Pages (sin headers COOP/COEP dedicados).
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

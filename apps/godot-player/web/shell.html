@@ -87,7 +87,9 @@
     const fill = document.getElementById('fill');
     const canvas = document.getElementById('canvas');
 
-    const engine = new Engine($GODOT_CONFIG);
+    const godotConfig = $GODOT_CONFIG;
+    godotConfig.ensureCrossOriginIsolationHeaders = false;
+    const engine = new Engine(godotConfig);
 
     engine.startGame({
       canvas,
