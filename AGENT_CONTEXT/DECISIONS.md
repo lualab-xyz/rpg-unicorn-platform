@@ -78,3 +78,8 @@
 - Estado: acordada.
 - Decisión: incorporar un template externo funcional como referencia (`example/godot-2d-topdown-template`) para guiar el rediseño visual/arquitectónico de nuestro framework.
 - Motivo: detectar patrones probados en representación visual y flujo de juego para corregir fallos estructurales actuales.
+
+### D-015 — UI state-driven para controles/contexto en móvil
+- Estado: acordada.
+- Decisión: la visibilidad/estado/texto de controles móviles debe derivarse de un estado de UI explícito (exploración, cerca de NPC, diálogo), no de condiciones sueltas.
+- Motivo: permitir cambios rápidos de UX (texto, enabled/disabled, hints) sin romper comportamientos entre móvil y escritorio.

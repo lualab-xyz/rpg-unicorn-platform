@@ -93,3 +93,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Restaurar pulsación mantenida en D-pad con lectura continua de `button_pressed`.
 - [x] Garantizar botones de acción móviles visibles en esquina inferior derecha.
 - [x] Corregir posicionamiento de botones de acción usando contenedor `Actions` (evitar coordenadas relativas fuera de panel).
+- [x] Implementar control state-driven de UI móvil (texto/visibilidad/habilitación por contexto).
+- [x] Añadir hint contextual (`...`) junto al NPC cuando está disponible hablar.
+- [x] En diálogo móvil: deshabilitar ataque y laterales del D-pad; mantener arriba/abajo habilitados.

@@ -137,6 +137,10 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - D-pad ahora se evalúa por estado continuo (`button_pressed`) para permitir mantener pulsación y movimiento fluido.
 - Botones móviles de acción (`ACCION`, `ATAQUE`) forzados en esquina inferior derecha solo en modo móvil.
 - Fix adicional: los botones de acción no aparecían por posicionamiento absoluto incorrecto de hijos; ahora se posicionan dentro de `Actions` con coordenadas locales y `Actions` se ancla en esquina inferior derecha.
+- Se incorporó modelo de estado UI para móvil:
+  - `explore`: `ACCION` + `ATAQUE` activos,
+  - `near_npc`: `ACCION` pasa a `HABLAR` y aparece hint `...` junto al NPC,
+  - `dialog`: `HABLAR` se mantiene, `ATAQUE` deshabilitado, D-pad lateral deshabilitado y vertical habilitado.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

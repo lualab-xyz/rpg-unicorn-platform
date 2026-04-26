@@ -18,6 +18,7 @@ extends Node2D
 @onready var btn_select: Button = $HUD/HUDRoot/Actions/Select
 @onready var btn_attack: Button = $HUD/HUDRoot/Actions/Attack
 @onready var actions_root: Control = $HUD/HUDRoot/Actions
+@onready var interact_hint: Panel = $HUD/HUDRoot/InteractHint
 @onready var top_stats: Panel = $HUD/HUDRoot/TopStats
 @onready var top_title: Panel = $HUD/HUDRoot/TopTitle
 @onready var top_map: Panel = $HUD/HUDRoot/TopMap
@@ -85,6 +86,7 @@ func _ready() -> void:
     touch_pad.axis_changed.connect(_on_touch_axis_changed)
     touch_pad.mouse_filter = Control.MOUSE_FILTER_STOP
     touch_pad.knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    interact_hint.visible = false
     _refresh_top_labels()
 
 
@@ -95,13 +97,10 @@ func _is_mobile_ui() -> bool:
         return true
     if OS.has_feature("web"):
         if Engine.has_singleton("JavaScriptBridge"):
-            var ww := int(JavaScriptBridge.eval("window.innerWidth", true))
-            var wh := int(JavaScriptBridge.eval("window.innerHeight", true))
             var coarse := bool(JavaScriptBridge.eval("window.matchMedia('(pointer: coarse)').matches", true))
             var mobile_ua := bool(JavaScriptBridge.eval("/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)", true))
             if coarse or mobile_ua:
                 return true
-            return min(ww, wh) <= 520
         return false
     return false
 
@@ -118,10 +117,7 @@ func _physics_process(_delta: float) -> void:
     player.call("set_locked", dialogue_active)
 
     var can_talk := _near_npc()
-    btn_talk.visible = mobile and not dialogue_active
-    btn_attack.visible = mobile and not dialogue_active
-    touch_pad.set_enabled(false)
-    dpad.visible = mobile and not dialogue_active
+    _apply_ui_state(mobile, can_talk)
 
     if can_talk and not dialogue_active:
         if Input.is_action_pressed("ui_accept") and not interaction_latch:
@@ -350,11 +346,9 @@ func _sync_mobile_layout() -> void:
         btn_talk.text = "SPACE"
         btn_attack.text = "CTRL"
 
-    dpad.visible = mobile and not dialogue_active
-    btn_talk.visible = mobile and not dialogue_active
-    btn_attack.visible = mobile and not dialogue_active
     actions_root.visible = mobile
     btn_select.visible = false
+    _apply_ui_state(mobile, _near_npc())
 
     _refresh_top_labels()
 
@@ -378,6 +372,59 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_axis_changed(value: Vector2) -> void:
     touch_axis = value
+
+
+func _apply_ui_state(mobile: bool, can_talk: bool) -> void:
+    touch_pad.set_enabled(false)
+    actions_root.visible = mobile
+    dpad.visible = mobile
+    btn_select.visible = false
+
+    if not mobile:
+        btn_talk.visible = false
+        btn_attack.visible = false
+        interact_hint.visible = false
+        dpad_left.disabled = false
+        dpad_right.disabled = false
+        dpad_up.disabled = false
+        dpad_down.disabled = false
+        return
+
+    btn_talk.visible = true
+    btn_attack.visible = true
+
+    if dialogue_active:
+        btn_talk.text = "HABLAR"
+        btn_attack.disabled = true
+        dpad_left.disabled = true
+        dpad_right.disabled = true
+        dpad_up.disabled = false
+        dpad_down.disabled = false
+        interact_hint.visible = false
+        return
+
+    btn_attack.disabled = false
+    dpad_left.disabled = false
+    dpad_right.disabled = false
+    dpad_up.disabled = false
+    dpad_down.disabled = false
+
+    if can_talk:
+        btn_talk.text = "HABLAR"
+        _place_interact_hint()
+        interact_hint.visible = true
+    else:
+        btn_talk.text = "ACCION"
+        interact_hint.visible = false
+
+
+func _place_interact_hint() -> void:
+    var cam: Camera2D = player.get_node_or_null("Camera2D")
+    if cam == null:
+        return
+    var vp := get_viewport().get_visible_rect().size
+    var screen := npc.global_position - cam.global_position + vp * 0.5
+    interact_hint.position = Vector2(screen.x - 18, screen.y - 30)
 
 
 func _on_hud_prev() -> void:

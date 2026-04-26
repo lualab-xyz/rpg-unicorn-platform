@@ -202,6 +202,23 @@ offset_right = 116.0
 offset_bottom = 44.0
 text = "> ..."
 
+[node name="InteractHint" type="Panel" parent="HUD/HUDRoot"]
+offset_left = 140.0
+offset_top = 110.0
+offset_right = 188.0
+offset_bottom = 130.0
+visible = false
+theme_override_styles/panel = SubResource("PanelStyle")
+theme = SubResource("ThemeUi")
+
+[node name="Label" type="Label" parent="HUD/HUDRoot/InteractHint"]
+offset_left = 8.0
+offset_top = 4.0
+offset_right = 40.0
+offset_bottom = 18.0
+text = "..."
+horizontal_alignment = 1
+
 [node name="TouchPad" type="Panel" parent="HUD/HUDRoot"]
 offset_left = 8.0
 offset_top = 204.0
