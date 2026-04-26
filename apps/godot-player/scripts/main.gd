@@ -26,13 +26,10 @@ extends Node2D
 @onready var top_title_label: Label = $HUD/TopTitle/Label
 @onready var top_map_label: Label = $HUD/TopMap/Label
 @onready var corner_markers: Control = $HUD/CornerMarkers
-@onready var marker_tl: ColorRect = $HUD/CornerMarkers/TopLeft
-@onready var marker_tr: ColorRect = $HUD/CornerMarkers/TopRight
-@onready var marker_bl: ColorRect = $HUD/CornerMarkers/BottomLeft
-@onready var marker_br: ColorRect = $HUD/CornerMarkers/BottomRight
 
 var touch_axis := Vector2.ZERO
 var hud_index := 0
+var was_near_npc := false
 
 var dialogue_active := false
 var dialogue_node := ""
@@ -120,8 +117,11 @@ func _physics_process(_delta: float) -> void:
     var can_talk := _near_npc()
     btn_talk.visible = can_talk and not dialogue_active
     btn_select.visible = dialogue_active
-    touch_pad.set_enabled(_is_mobile_ui() and not dialogue_active)
+    touch_pad.set_enabled(false)
     dpad.visible = _is_mobile_ui() and not dialogue_active
+
+    if can_talk and not was_near_npc and not dialogue_active:
+        _start_dialogue()
 
     if can_talk and not dialogue_active:
         if Input.is_action_pressed("ui_accept"):
@@ -140,6 +140,8 @@ func _physics_process(_delta: float) -> void:
             _step_choice(1)
         if Input.is_action_just_pressed("ui_accept"):
             _accept_choice()
+
+    was_near_npc = can_talk
 
 
 func _movement_axis() -> Vector2:
@@ -292,7 +294,7 @@ func _sync_mobile_layout() -> void:
         pad_label.size = Vector2(84, 18)
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
         btn_select.position = Vector2(vp.x - 100, vp.y - 70)
-        dpad.position = Vector2(8, 96)
+        dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
     else:
         top_stats.position = Vector2(8, 8)
@@ -317,14 +319,10 @@ func _sync_mobile_layout() -> void:
         dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
 
-    touch_pad.set_enabled(mobile and not dialogue_active)
+    touch_pad.set_enabled(false)
     dpad.visible = mobile and not dialogue_active
 
-    corner_markers.visible = true
-    marker_tl.position = Vector2(2, 2)
-    marker_tr.position = Vector2(vp.x - 7, 2)
-    marker_bl.position = Vector2(2, vp.y - 7)
-    marker_br.position = Vector2(vp.x - 7, vp.y - 7)
+    corner_markers.visible = false
 
     _refresh_top_labels()
 

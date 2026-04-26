@@ -81,3 +81,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Añadir marcadores visuales en las 4 esquinas del viewport para validar límites reales en cliente móvil.
 - [x] Corregir orden de capas para que jugador/NPC queden por encima de camino/puente.
 - [x] Ajustar interacción con NPC para abrir diálogo en móvil de forma fiable (sin depender de just_pressed estricto).
+- [x] Limitar margaritas al césped (no dibujar sobre path/agua/puente).
+- [x] Quitar puntos de esquinas y mantener D-pad temporal en esquina inferior izquierda.
+- [x] Activar apertura de diálogo por proximidad al NPC como fallback UX temporal.

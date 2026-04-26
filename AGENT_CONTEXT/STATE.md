@@ -124,6 +124,11 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - Correcciones aplicadas:
   - capas del tilemap movidas a z-index negativos para asegurar entidades visibles encima,
   - lógica de interacción con latch para robustecer apertura de diálogo en móvil.
+- Ajustes posteriores solicitados por usuario:
+  - margaritas restringidas a celdas de césped,
+  - puntos de depuración de esquinas desactivados,
+  - D-pad temporal mantenido y reposicionado en esquina inferior izquierda,
+  - diálogo activable automáticamente por proximidad al NPC para evitar bloqueo de progreso.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

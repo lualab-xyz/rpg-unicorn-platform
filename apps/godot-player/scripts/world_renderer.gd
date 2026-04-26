@@ -63,8 +63,27 @@ func _build_ground() -> void:
         for x in range(w_tiles):
             var even := (x + y) % 2 == 0
             _set_cell(LAYER_GROUND, x, y, 0 if even else 1, 0)
-            if int(x * 13 + y * 7) % 29 == 0:
+            if int(x * 13 + y * 7) % 29 == 0 and _is_grass_only_cell(x, y):
                 _set_cell(LAYER_DECOR, x, y, 2, 0)
+
+
+func _is_grass_only_cell(tile_x: int, tile_y: int) -> bool:
+    var wx := tile_x * TILE + TILE / 2
+    var wy := tile_y * TILE + TILE / 2
+
+    var river := Rect2(980, 120, 260, 1160)
+    var bridge := Rect2(940, 640, 340, 110)
+    if river.has_point(Vector2(wx, wy)):
+        return false
+    if bridge.has_point(Vector2(wx, wy)):
+        return false
+
+    var path_a := Rect2(120, 705, 860, 42)
+    var path_b := Rect2(1240, 705, 840, 42)
+    if path_a.has_point(Vector2(wx, wy)) or path_b.has_point(Vector2(wx, wy)):
+        return false
+
+    return true
 
 
 func _build_water() -> void:
