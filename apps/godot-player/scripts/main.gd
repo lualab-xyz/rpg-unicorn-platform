@@ -2,34 +2,36 @@ extends Node2D
 
 @onready var player: CharacterBody2D = $World/Player
 @onready var npc: Node2D = $World/NPC
-@onready var dialog_panel: Panel = $HUD/DialogPanel
-@onready var dialog_speaker: Label = $HUD/DialogPanel/Speaker
-@onready var dialog_text: Label = $HUD/DialogPanel/Text
-@onready var choices_panel: Panel = $HUD/ChoicesPanel
-@onready var choices_label: Label = $HUD/ChoicesPanel/Choices
-@onready var touch_pad = $HUD/TouchPad
-@onready var pad_label: Label = $HUD/TouchPad/PadLabel
-@onready var dpad: Control = $HUD/DPad
-@onready var dpad_up: Button = $HUD/DPad/Up
-@onready var dpad_down: Button = $HUD/DPad/Down
-@onready var dpad_left: Button = $HUD/DPad/Left
-@onready var dpad_right: Button = $HUD/DPad/Right
-@onready var btn_talk: Button = $HUD/Actions/Talk
-@onready var btn_select: Button = $HUD/Actions/Select
-@onready var top_stats: Panel = $HUD/TopStats
-@onready var top_title: Panel = $HUD/TopTitle
-@onready var top_map: Panel = $HUD/TopMap
-@onready var hud_nav: Panel = $HUD/HudNav
-@onready var hud_prev: Button = $HUD/HudNav/Prev
-@onready var hud_next: Button = $HUD/HudNav/Next
-@onready var top_stats_label: Label = $HUD/TopStats/Label
-@onready var top_title_label: Label = $HUD/TopTitle/Label
-@onready var top_map_label: Label = $HUD/TopMap/Label
-@onready var corner_markers: Control = $HUD/CornerMarkers
+@onready var hud_root: Control = $HUD/HUDRoot
+@onready var dialog_panel: Panel = $HUD/HUDRoot/DialogPanel
+@onready var dialog_speaker: Label = $HUD/HUDRoot/DialogPanel/Speaker
+@onready var dialog_text: Label = $HUD/HUDRoot/DialogPanel/Text
+@onready var choices_panel: Panel = $HUD/HUDRoot/ChoicesPanel
+@onready var choices_label: Label = $HUD/HUDRoot/ChoicesPanel/Choices
+@onready var touch_pad = $HUD/HUDRoot/TouchPad
+@onready var pad_label: Label = $HUD/HUDRoot/TouchPad/PadLabel
+@onready var dpad: Control = $HUD/HUDRoot/DPad
+@onready var dpad_up: Button = $HUD/HUDRoot/DPad/Up
+@onready var dpad_down: Button = $HUD/HUDRoot/DPad/Down
+@onready var dpad_left: Button = $HUD/HUDRoot/DPad/Left
+@onready var dpad_right: Button = $HUD/HUDRoot/DPad/Right
+@onready var btn_talk: Button = $HUD/HUDRoot/Actions/Talk
+@onready var btn_select: Button = $HUD/HUDRoot/Actions/Select
+@onready var btn_attack: Button = $HUD/HUDRoot/Actions/Attack
+@onready var top_stats: Panel = $HUD/HUDRoot/TopStats
+@onready var top_title: Panel = $HUD/HUDRoot/TopTitle
+@onready var top_map: Panel = $HUD/HUDRoot/TopMap
+@onready var hud_nav: Panel = $HUD/HUDRoot/HudNav
+@onready var hud_prev: Button = $HUD/HUDRoot/HudNav/Prev
+@onready var hud_next: Button = $HUD/HUDRoot/HudNav/Next
+@onready var top_stats_label: Label = $HUD/HUDRoot/TopStats/Label
+@onready var top_title_label: Label = $HUD/HUDRoot/TopTitle/Label
+@onready var top_map_label: Label = $HUD/HUDRoot/TopMap/Label
+@onready var corner_markers: Control = $HUD/HUDRoot/CornerMarkers
 
 var touch_axis := Vector2.ZERO
 var hud_index := 0
-var was_near_npc := false
+var attack_latch := false
 
 var dialogue_active := false
 var dialogue_node := ""
@@ -64,14 +66,22 @@ var dialogue_tree := {
 
 
 func _ready() -> void:
+    hud_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+    hud_root.offset_left = 0
+    hud_root.offset_top = 0
+    hud_root.offset_right = 0
+    hud_root.offset_bottom = 0
+
     _sync_mobile_layout()
     _set_dialog_visible(false)
     _set_choices_visible(false)
 
     btn_talk.visible = false
     btn_select.visible = false
+    btn_attack.visible = false
     btn_talk.pressed.connect(_on_talk_pressed)
     btn_select.pressed.connect(_on_select_pressed)
+    btn_attack.pressed.connect(_on_attack_pressed)
     hud_prev.pressed.connect(_on_hud_prev)
     hud_next.pressed.connect(_on_hud_next)
 
@@ -96,11 +106,11 @@ func _ready() -> void:
 
 
 func _is_mobile_ui() -> bool:
-    var vp := get_viewport().get_visible_rect().size
-    if DisplayServer.is_touchscreen_available():
+    var ws := DisplayServer.window_get_size()
+    if OS.has_feature("mobile"):
         return true
-    if OS.has_feature("web") and vp.x <= 1024:
-        return true
+    if OS.has_feature("web"):
+        return ws.x <= 900
     return false
 
 
@@ -115,13 +125,11 @@ func _physics_process(_delta: float) -> void:
     player.call("set_locked", dialogue_active)
 
     var can_talk := _near_npc()
-    btn_talk.visible = can_talk and not dialogue_active
-    btn_select.visible = dialogue_active
+    btn_talk.visible = _is_mobile_ui()
+    btn_select.visible = false
+    btn_attack.visible = _is_mobile_ui() and not dialogue_active
     touch_pad.set_enabled(false)
     dpad.visible = _is_mobile_ui() and not dialogue_active
-
-    if can_talk and not was_near_npc and not dialogue_active:
-        _start_dialogue()
 
     if can_talk and not dialogue_active:
         if Input.is_action_pressed("ui_accept"):
@@ -133,16 +141,25 @@ func _physics_process(_delta: float) -> void:
     elif not dialogue_active:
         interaction_latch = false
 
+    if not dialogue_active:
+        if Input.is_key_pressed(KEY_CTRL):
+            if not attack_latch:
+                _do_attack()
+                attack_latch = true
+        else:
+            attack_latch = false
+
     if dialogue_active:
         if Input.is_action_just_pressed("ui_up"):
             _step_choice(-1)
         if Input.is_action_just_pressed("ui_down"):
             _step_choice(1)
-        if Input.is_action_just_pressed("ui_accept"):
+        if Input.is_action_pressed("ui_accept") and not interaction_latch:
             _accept_choice()
+            interaction_latch = true
 
-    was_near_npc = can_talk
-
+    if not Input.is_action_pressed("ui_accept"):
+        interaction_latch = false
 
 func _movement_axis() -> Vector2:
     if dialogue_active:
@@ -254,7 +271,10 @@ func _set_choices_visible(v: bool) -> void:
 
 
 func _on_talk_pressed() -> void:
-    if not dialogue_active and _near_npc():
+    if dialogue_active:
+        _accept_choice()
+        return
+    if _near_npc():
         _start_dialogue()
         interaction_latch = true
 
@@ -262,6 +282,17 @@ func _on_talk_pressed() -> void:
 func _on_select_pressed() -> void:
     if dialogue_active:
         _accept_choice()
+
+
+func _on_attack_pressed() -> void:
+    if not dialogue_active:
+        _do_attack()
+
+
+func _do_attack() -> void:
+    player.modulate = Color(1.0, 0.82, 0.88, 1.0)
+    var t := get_tree().create_timer(0.12)
+    t.timeout.connect(func(): player.modulate = Color(1, 1, 1, 1))
 
 
 func _sync_mobile_layout() -> void:
@@ -294,8 +325,11 @@ func _sync_mobile_layout() -> void:
         pad_label.size = Vector2(84, 18)
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
         btn_select.position = Vector2(vp.x - 100, vp.y - 70)
+        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
         dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
+        btn_talk.text = "ACCION"
+        btn_attack.text = "ATAQUE"
     else:
         top_stats.position = Vector2(8, 8)
         top_stats.size = Vector2(100, 58)
@@ -316,11 +350,18 @@ func _sync_mobile_layout() -> void:
         pad_label.size = Vector2(64, 18)
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
         btn_select.position = Vector2(vp.x - 100, vp.y - 70)
+        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
         dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
+        btn_talk.text = "SPACE"
+        btn_select.text = "ENTER"
+        btn_attack.text = "CTRL"
 
     touch_pad.set_enabled(false)
     dpad.visible = mobile and not dialogue_active
+    btn_talk.visible = mobile
+    btn_select.visible = false
+    btn_attack.visible = mobile and not dialogue_active
 
     corner_markers.visible = false
 

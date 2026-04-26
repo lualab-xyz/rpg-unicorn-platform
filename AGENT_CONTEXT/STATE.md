@@ -128,7 +128,9 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - margaritas restringidas a celdas de césped,
   - puntos de depuración de esquinas desactivados,
   - D-pad temporal mantenido y reposicionado en esquina inferior izquierda,
-  - diálogo activable automáticamente por proximidad al NPC para evitar bloqueo de progreso.
+  - diálogo vuelve a modo de acción explícita (sin autoinicio),
+  - HUD ajustado para no usar comportamiento de móvil en escritorio,
+  - acción secundaria de ataque añadida en móvil (botón) y escritorio (`CTRL`).
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

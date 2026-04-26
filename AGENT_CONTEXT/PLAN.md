@@ -84,3 +84,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Limitar margaritas al césped (no dibujar sobre path/agua/puente).
 - [x] Quitar puntos de esquinas y mantener D-pad temporal en esquina inferior izquierda.
 - [x] Activar apertura de diálogo por proximidad al NPC como fallback UX temporal.
+- [x] Corregir layout HUD desktop/mobile para evitar escalado tipo móvil en escritorio.
+- [x] Cambiar interacción con NPC para requerir acción explícita (sin autoinicio por proximidad).
+- [x] Añadir botón de ataque en UI móvil y atajo `CTRL` en escritorio como acción secundaria.
