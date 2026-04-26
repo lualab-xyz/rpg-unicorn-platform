@@ -79,3 +79,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Mover temporalmente pad móvil a esquina superior izquierda para depuración visual.
 - [x] Sustituir temporalmente pad analógico por D-pad de 4 botones para depuración de input móvil.
 - [x] Añadir marcadores visuales en las 4 esquinas del viewport para validar límites reales en cliente móvil.
+- [x] Corregir orden de capas para que jugador/NPC queden por encima de camino/puente.
+- [x] Ajustar interacción con NPC para abrir diálogo en móvil de forma fiable (sin depender de just_pressed estricto).

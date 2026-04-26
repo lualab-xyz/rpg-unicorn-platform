@@ -21,11 +21,11 @@ func _ready() -> void:
     while tilemap.get_layers_count() <= LAYER_DECOR:
         tilemap.add_layer(tilemap.get_layers_count())
 
-    tilemap.set_layer_z_index(LAYER_GROUND, 0)
-    tilemap.set_layer_z_index(LAYER_PATH, 1)
-    tilemap.set_layer_z_index(LAYER_WATER, 2)
-    tilemap.set_layer_z_index(LAYER_BRIDGE, 3)
-    tilemap.set_layer_z_index(LAYER_DECOR, 5)
+    tilemap.set_layer_z_index(LAYER_GROUND, -10)
+    tilemap.set_layer_z_index(LAYER_PATH, -9)
+    tilemap.set_layer_z_index(LAYER_WATER, -8)
+    tilemap.set_layer_z_index(LAYER_BRIDGE, -7)
+    tilemap.set_layer_z_index(LAYER_DECOR, -6)
 
     var ts := TileSet.new()
     var atlas := TileSetAtlasSource.new()

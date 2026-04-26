@@ -37,6 +37,7 @@ var hud_index := 0
 var dialogue_active := false
 var dialogue_node := ""
 var dialogue_index := 0
+var interaction_latch := false
 
 var dialogue_tree := {
     "start": {
@@ -122,8 +123,15 @@ func _physics_process(_delta: float) -> void:
     touch_pad.set_enabled(_is_mobile_ui() and not dialogue_active)
     dpad.visible = _is_mobile_ui() and not dialogue_active
 
-    if not dialogue_active and can_talk and Input.is_action_just_pressed("ui_accept"):
-        _start_dialogue()
+    if can_talk and not dialogue_active:
+        if Input.is_action_pressed("ui_accept"):
+            if not interaction_latch:
+                _start_dialogue()
+                interaction_latch = true
+        else:
+            interaction_latch = false
+    elif not dialogue_active:
+        interaction_latch = false
 
     if dialogue_active:
         if Input.is_action_just_pressed("ui_up"):
@@ -246,6 +254,7 @@ func _set_choices_visible(v: bool) -> void:
 func _on_talk_pressed() -> void:
     if not dialogue_active and _near_npc():
         _start_dialogue()
+        interaction_latch = true
 
 
 func _on_select_pressed() -> void:

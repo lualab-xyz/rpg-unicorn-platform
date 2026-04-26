@@ -117,6 +117,13 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - posiciones/tamaños ahora calculados con `get_viewport().get_visible_rect().size`,
   - pad movido temporalmente a zona superior izquierda para validar presencia en cliente móvil.
 - Para aislar fallo de input táctil analógico, se añadió control temporal D-pad (4 botones) y se activaron marcadores de esquinas del viewport.
+- Feedback validado:
+  - D-pad temporal funciona,
+  - marcadores de esquinas están correctos,
+  - detectado fallo de z-order (jugador bajo camino/puente) y apertura de diálogo en proximidad.
+- Correcciones aplicadas:
+  - capas del tilemap movidas a z-index negativos para asegurar entidades visibles encima,
+  - lógica de interacción con latch para robustecer apertura de diálogo en móvil.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
