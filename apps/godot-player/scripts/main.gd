@@ -2,14 +2,12 @@ extends Node2D
 
 @onready var player: CharacterBody2D = $World/Player
 @onready var npc: Node2D = $World/NPC
-@onready var hud_root: CanvasLayer = $HUD
 @onready var dialog_panel: Panel = $HUD/DialogPanel
 @onready var dialog_speaker: Label = $HUD/DialogPanel/Speaker
 @onready var dialog_text: Label = $HUD/DialogPanel/Text
 @onready var choices_panel: Panel = $HUD/ChoicesPanel
 @onready var choices_label: Label = $HUD/ChoicesPanel/Choices
-@onready var touch_pad: Control = $HUD/TouchPad
-@onready var pad_knob: Panel = $HUD/TouchPad/Knob
+@onready var touch_pad = $HUD/TouchPad
 @onready var pad_label: Label = $HUD/TouchPad/PadLabel
 @onready var btn_talk: Button = $HUD/Actions/Talk
 @onready var btn_select: Button = $HUD/Actions/Select
@@ -24,8 +22,6 @@ extends Node2D
 @onready var top_map_label: Label = $HUD/TopMap/Label
 
 var touch_axis := Vector2.ZERO
-var touch_active := false
-var touch_id := -1
 var hud_index := 0
 
 var dialogue_active := false
@@ -63,17 +59,20 @@ func _ready() -> void:
     _sync_mobile_layout()
     _set_dialog_visible(false)
     _set_choices_visible(false)
+
     btn_talk.visible = false
     btn_select.visible = false
     btn_talk.pressed.connect(_on_talk_pressed)
     btn_select.pressed.connect(_on_select_pressed)
     hud_prev.pressed.connect(_on_hud_prev)
     hud_next.pressed.connect(_on_hud_next)
+
+    touch_pad.axis_changed.connect(_on_touch_axis_changed)
     touch_pad.mouse_filter = Control.MOUSE_FILTER_STOP
-    pad_knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    touch_pad.knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
     pad_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
     touch_pad.modulate = Color(1, 1, 1, 0.95)
-    pad_knob.modulate = Color(1, 0.8, 0.93, 1)
+    touch_pad.knob.modulate = Color(1, 0.8, 0.93, 1)
     pad_label.modulate = Color(1, 1, 1, 1)
     _refresh_top_labels()
 
@@ -99,7 +98,7 @@ func _physics_process(_delta: float) -> void:
     var can_talk := _near_npc()
     btn_talk.visible = can_talk and not dialogue_active
     btn_select.visible = dialogue_active
-    touch_pad.visible = _is_mobile_ui() and not dialogue_active
+    touch_pad.set_enabled(_is_mobile_ui() and not dialogue_active)
 
     if not dialogue_active and can_talk and Input.is_action_just_pressed("ui_accept"):
         _start_dialogue()
@@ -117,7 +116,7 @@ func _movement_axis() -> Vector2:
     if dialogue_active:
         return Vector2.ZERO
     var axis := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-    if touch_active:
+    if touch_axis != Vector2.ZERO:
         axis += touch_axis
     if axis.length() > 1.0:
         axis = axis.normalized()
@@ -253,8 +252,9 @@ func _sync_mobile_layout() -> void:
         choices_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 54)
         touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 126)
         touch_pad.size = Vector2(112, 112)
-        pad_knob.position = Vector2(42, 42)
-        pad_knob.size = Vector2(30, 30)
+        touch_pad.knob.position = Vector2(42, 42)
+        touch_pad.knob.size = Vector2(30, 30)
+        touch_pad.radius = 44.0
         pad_label.position = Vector2(14, 84)
         pad_label.size = Vector2(84, 18)
         btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
@@ -272,34 +272,20 @@ func _sync_mobile_layout() -> void:
         choices_panel.size = Vector2(132, 72)
         touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 120)
         touch_pad.size = Vector2(96, 96)
-        pad_knob.position = Vector2(36, 36)
-        pad_knob.size = Vector2(24, 24)
+        touch_pad.knob.position = Vector2(36, 36)
+        touch_pad.knob.size = Vector2(24, 24)
+        touch_pad.radius = 38.0
         pad_label.position = Vector2(18, 70)
         pad_label.size = Vector2(64, 18)
         btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
         btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
 
-    touch_pad.visible = mobile and not dialogue_active
+    touch_pad.set_enabled(mobile and not dialogue_active)
     _refresh_top_labels()
 
 
 func _input(event: InputEvent) -> void:
-    if event is InputEventScreenTouch:
-        var touch := event as InputEventScreenTouch
-        if touch.pressed and touch.position.distance_to(touch_pad.global_position + touch_pad.size * 0.5) < 70:
-            touch_active = true
-            touch_id = touch.index
-            _update_touch_axis(touch.position)
-        elif (not touch.pressed) and touch.index == touch_id:
-            touch_active = false
-            touch_axis = Vector2.ZERO
-            touch_id = -1
-            pad_knob.position = Vector2((touch_pad.size.x - pad_knob.size.x) * 0.5, (touch_pad.size.y - pad_knob.size.y) * 0.5)
-    elif event is InputEventScreenDrag:
-        var drag := event as InputEventScreenDrag
-        if touch_active and drag.index == touch_id:
-            _update_touch_axis(drag.position)
-    elif event is InputEventKey:
+    if event is InputEventKey:
         var k := event as InputEventKey
         if _is_mobile_ui() and k.pressed and not k.echo:
             if k.physical_keycode == KEY_Q:
@@ -310,15 +296,8 @@ func _input(event: InputEvent) -> void:
                 _sync_mobile_layout()
 
 
-func _update_touch_axis(point: Vector2) -> void:
-    var center := touch_pad.global_position + touch_pad.size * 0.5
-    var d := point - center
-    var axis := d / 42.0
-    axis.x = clamp(axis.x, -1.0, 1.0)
-    axis.y = clamp(axis.y, -1.0, 1.0)
-    touch_axis = axis
-    var base := Vector2((touch_pad.size.x - pad_knob.size.x) * 0.5, (touch_pad.size.y - pad_knob.size.y) * 0.5)
-    pad_knob.position = base + Vector2(axis.x * 22.0, axis.y * 22.0)
+func _on_touch_axis_changed(value: Vector2) -> void:
+    touch_axis = value
 
 
 func _on_hud_prev() -> void:

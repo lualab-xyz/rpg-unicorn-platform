@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" path="res://assets/ui/panel-9slice.png" id="5_panel"]
 [ext_resource type="Texture2D" path="res://assets/ui/button-9slice.png" id="6_button"]
 [ext_resource type="FontFile" path="res://assets/ui/PressStart2P-Regular.ttf" id="7_font"]
+[ext_resource type="Script" path="res://scripts/components/touch_pad.gd" id="8_pad"]
 
 [sub_resource type="RectangleShape2D" id="CollisionRectTop"]
 size = Vector2(260, 520)
@@ -201,6 +202,7 @@ offset_bottom = 316.0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("ButtonStyle")
 theme = SubResource("ThemeUi")
+script = ExtResource("8_pad")
 
 [node name="Knob" type="Panel" parent="HUD/TouchPad"]
 offset_left = 42.0
@@ -208,6 +210,7 @@ offset_top = 42.0
 offset_right = 72.0
 offset_bottom = 72.0
 theme_override_styles/panel = SubResource("ButtonStyle")
+mouse_filter = 2
 
 [node name="PadLabel" type="Label" parent="HUD/TouchPad"]
 offset_left = 14.0

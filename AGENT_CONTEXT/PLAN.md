@@ -73,3 +73,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Revisar estructura técnica del template para identificar patrones aplicables a nuestro framework.
 - [x] Refactorizar renderer Godot a enfoque TileMapLayer-first inspirado en template de referencia.
 - [x] Rehacer escena principal para alinear mapa/collisions/UI bajo arquitectura más robusta.
+- [x] Extraer control táctil a componente dedicado (`scripts/components/touch_pad.gd`).
+- [x] Simplificar `main.gd` eliminando gestión manual de punteros/touch duplicada.

@@ -110,6 +110,9 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - renderer migrado a `TileMap` multicapa programático (`ground/path/water/bridge/decor`),
   - escena `main.tscn` reconstruida para coherencia entre render y colisiones,
   - validación headless sin errores tras ajuste de capas del tilemap.
+- Control móvil refactorizado a componente reutilizable:
+  - `apps/godot-player/scripts/components/touch_pad.gd` centraliza pointer/touch axis,
+  - `main.gd` consume señal `axis_changed` y elimina lógica duplicada de drag/touch.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
