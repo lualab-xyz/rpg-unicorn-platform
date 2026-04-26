@@ -78,9 +78,10 @@ func _ready() -> void:
 
 
 func _is_mobile_ui() -> bool:
+    var vp := get_viewport().get_visible_rect().size
     if DisplayServer.is_touchscreen_available():
         return true
-    if OS.has_feature("web") and DisplayServer.window_get_size().x <= 1024:
+    if OS.has_feature("web") and vp.x <= 1024:
         return true
     return false
 
@@ -163,9 +164,10 @@ func _render_dialogue() -> void:
 
 
 func _fit_dialog_text(full_text: String) -> String:
+    var vp := get_viewport().get_visible_rect().size
     var chars_per_line := 38
     var max_lines := 3
-    if _is_mobile_ui():
+    if _is_mobile_ui() or vp.x < 420:
         chars_per_line = 28
         max_lines = 3
 
@@ -232,6 +234,7 @@ func _on_select_pressed() -> void:
 
 func _sync_mobile_layout() -> void:
     var mobile := _is_mobile_ui()
+    var vp := get_viewport().get_visible_rect().size
     var hud_panels := [top_stats, top_title, top_map]
     hud_nav.visible = mobile
     for i in range(hud_panels.size()):
@@ -239,7 +242,7 @@ func _sync_mobile_layout() -> void:
 
     if mobile:
         top_stats.position = Vector2(8, 8)
-        top_stats.size = Vector2(DisplayServer.window_get_size().x - 16, 56)
+        top_stats.size = Vector2(vp.x - 16, 56)
         top_title.position = top_stats.position
         top_title.size = top_stats.size
         top_map.position = top_stats.position
@@ -247,18 +250,18 @@ func _sync_mobile_layout() -> void:
         hud_nav.position = Vector2(8, 66)
         hud_nav.size = Vector2(104, 26)
         dialog_panel.position = Vector2(8, 72)
-        dialog_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 68)
+        dialog_panel.size = Vector2(vp.x - 16, 68)
         choices_panel.position = Vector2(8, 146)
-        choices_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 54)
-        touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 126)
+        choices_panel.size = Vector2(vp.x - 16, 54)
+        touch_pad.position = Vector2(8, 96)
         touch_pad.size = Vector2(112, 112)
         touch_pad.knob.position = Vector2(42, 42)
         touch_pad.knob.size = Vector2(30, 30)
         touch_pad.radius = 44.0
         pad_label.position = Vector2(14, 84)
         pad_label.size = Vector2(84, 18)
-        btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
-        btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
+        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
+        btn_select.position = Vector2(vp.x - 100, vp.y - 70)
     else:
         top_stats.position = Vector2(8, 8)
         top_stats.size = Vector2(100, 58)
@@ -266,19 +269,19 @@ func _sync_mobile_layout() -> void:
         top_title.size = Vector2(98, 32)
         top_map.position = Vector2(222, 8)
         top_map.size = Vector2(90, 32)
-        dialog_panel.position = Vector2(8, DisplayServer.window_get_size().y - 84)
-        dialog_panel.size = Vector2(DisplayServer.window_get_size().x - 16, 76)
-        choices_panel.position = Vector2(DisplayServer.window_get_size().x - 140, DisplayServer.window_get_size().y - 160)
+        dialog_panel.position = Vector2(8, vp.y - 84)
+        dialog_panel.size = Vector2(vp.x - 16, 76)
+        choices_panel.position = Vector2(vp.x - 140, vp.y - 160)
         choices_panel.size = Vector2(132, 72)
-        touch_pad.position = Vector2(8, DisplayServer.window_get_size().y - 120)
+        touch_pad.position = Vector2(8, vp.y - 120)
         touch_pad.size = Vector2(96, 96)
         touch_pad.knob.position = Vector2(36, 36)
         touch_pad.knob.size = Vector2(24, 24)
         touch_pad.radius = 38.0
         pad_label.position = Vector2(18, 70)
         pad_label.size = Vector2(64, 18)
-        btn_talk.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 112)
-        btn_select.position = Vector2(DisplayServer.window_get_size().x - 100, DisplayServer.window_get_size().y - 70)
+        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
+        btn_select.position = Vector2(vp.x - 100, vp.y - 70)
 
     touch_pad.set_enabled(mobile and not dialogue_active)
     _refresh_top_labels()

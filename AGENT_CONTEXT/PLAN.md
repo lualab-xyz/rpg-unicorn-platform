@@ -75,3 +75,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Rehacer escena principal para alinear mapa/collisions/UI bajo arquitectura más robusta.
 - [x] Extraer control táctil a componente dedicado (`scripts/components/touch_pad.gd`).
 - [x] Simplificar `main.gd` eliminando gestión manual de punteros/touch duplicada.
+- [x] Ajustar layout para usar viewport visible real en web/móvil (no window size bruto).
+- [x] Mover temporalmente pad móvil a esquina superior izquierda para depuración visual.
