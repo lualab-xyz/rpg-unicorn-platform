@@ -73,3 +73,8 @@
 - Estado: acordada.
 - Decisión: mantener en Godot los elementos clave del look MVP (fuente retro, pad móvil visible, paleta del mundo coherente, loader web personalizado).
 - Motivo: durante el port no se deben perder señales visuales fundamentales del estilo 8-bit objetivo.
+
+### D-014 — Benchmark técnico con template Godot funcional
+- Estado: acordada.
+- Decisión: incorporar un template externo funcional como referencia (`example/godot-2d-topdown-template`) para guiar el rediseño visual/arquitectónico de nuestro framework.
+- Motivo: detectar patrones probados en representación visual y flujo de juego para corregir fallos estructurales actuales.

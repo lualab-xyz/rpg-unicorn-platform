@@ -68,3 +68,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Corregir tono del césped en render Godot para evitar look gris.
 - [x] Corregir offset doble de render en Godot (mundo vs cámara) para alinear visual/collisions.
 - [x] Ajustar detección de modo móvil en Web para mostrar pad en pantallas táctiles/tablet.
+- [x] Clonar repo de referencia `stesproject/godot-2d-topdown-template` fuera del workspace principal.
+- [x] Copiar template de referencia a `example/godot-2d-topdown-template` dentro de nuestro repo.
+- [x] Revisar estructura técnica del template para identificar patrones aplicables a nuestro framework.

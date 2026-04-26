@@ -94,6 +94,17 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - Corrección crítica aplicada: en `world_renderer.gd` se eliminó sustracción manual de cámara (Node2D + Camera2D ya hacen transform), corrigiendo desalineación visual con colisiones del río/puente y aparición parcial del césped.
 - Ajuste de detección móvil: pad se activa por touch capability y en web para anchos <= 1024 (evita falso desktop en tablets).
 
+## Referencia externa incorporada
+- Repositorio de referencia clonado localmente en `/workspace/godot-2d-topdown-template`.
+- Copia integrada en el proyecto en `example/godot-2d-topdown-template` (sin `.git`).
+- Hallazgos principales del template:
+  - uso de `TileMapLayer` por capas (terrain/water/walls/top) en vez de dibujar mundo manualmente,
+  - `StateMachine` genérica con estados composables para entidades,
+  - `CharacterEntity` base con movimiento/fricción/facing/animation y señales,
+  - autoloads para orquestación (`SceneManager`, `DataManager`, `Globals`),
+  - `SceneManager` con cargas asíncronas y transiciones,
+  - presets de pixel-art bien fijados en `project.godot` (scale_mode integer + snap to pixel + filter off).
+
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
 - Pages habilitado tras cambio de repositorio a público.
