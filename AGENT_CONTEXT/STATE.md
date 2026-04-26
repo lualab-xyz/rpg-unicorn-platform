@@ -116,6 +116,7 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
 - Ajuste de layout móvil en progreso:
   - posiciones/tamaños ahora calculados con `get_viewport().get_visible_rect().size`,
   - pad movido temporalmente a zona superior izquierda para validar presencia en cliente móvil.
+- Para aislar fallo de input táctil analógico, se añadió control temporal D-pad (4 botones) y se activaron marcadores de esquinas del viewport.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

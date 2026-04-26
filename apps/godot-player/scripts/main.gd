@@ -9,6 +9,11 @@ extends Node2D
 @onready var choices_label: Label = $HUD/ChoicesPanel/Choices
 @onready var touch_pad = $HUD/TouchPad
 @onready var pad_label: Label = $HUD/TouchPad/PadLabel
+@onready var dpad: Control = $HUD/DPad
+@onready var dpad_up: Button = $HUD/DPad/Up
+@onready var dpad_down: Button = $HUD/DPad/Down
+@onready var dpad_left: Button = $HUD/DPad/Left
+@onready var dpad_right: Button = $HUD/DPad/Right
 @onready var btn_talk: Button = $HUD/Actions/Talk
 @onready var btn_select: Button = $HUD/Actions/Select
 @onready var top_stats: Panel = $HUD/TopStats
@@ -20,6 +25,11 @@ extends Node2D
 @onready var top_stats_label: Label = $HUD/TopStats/Label
 @onready var top_title_label: Label = $HUD/TopTitle/Label
 @onready var top_map_label: Label = $HUD/TopMap/Label
+@onready var corner_markers: Control = $HUD/CornerMarkers
+@onready var marker_tl: ColorRect = $HUD/CornerMarkers/TopLeft
+@onready var marker_tr: ColorRect = $HUD/CornerMarkers/TopRight
+@onready var marker_bl: ColorRect = $HUD/CornerMarkers/BottomLeft
+@onready var marker_br: ColorRect = $HUD/CornerMarkers/BottomRight
 
 var touch_axis := Vector2.ZERO
 var hud_index := 0
@@ -74,6 +84,16 @@ func _ready() -> void:
     touch_pad.modulate = Color(1, 1, 1, 0.95)
     touch_pad.knob.modulate = Color(1, 0.8, 0.93, 1)
     pad_label.modulate = Color(1, 1, 1, 1)
+
+    dpad_up.button_down.connect(func(): _set_dpad_axis("up", true))
+    dpad_up.button_up.connect(func(): _set_dpad_axis("up", false))
+    dpad_down.button_down.connect(func(): _set_dpad_axis("down", true))
+    dpad_down.button_up.connect(func(): _set_dpad_axis("down", false))
+    dpad_left.button_down.connect(func(): _set_dpad_axis("left", true))
+    dpad_left.button_up.connect(func(): _set_dpad_axis("left", false))
+    dpad_right.button_down.connect(func(): _set_dpad_axis("right", true))
+    dpad_right.button_up.connect(func(): _set_dpad_axis("right", false))
+
     _refresh_top_labels()
 
 
@@ -100,6 +120,7 @@ func _physics_process(_delta: float) -> void:
     btn_talk.visible = can_talk and not dialogue_active
     btn_select.visible = dialogue_active
     touch_pad.set_enabled(_is_mobile_ui() and not dialogue_active)
+    dpad.visible = _is_mobile_ui() and not dialogue_active
 
     if not dialogue_active and can_talk and Input.is_action_just_pressed("ui_accept"):
         _start_dialogue()
@@ -262,6 +283,8 @@ func _sync_mobile_layout() -> void:
         pad_label.size = Vector2(84, 18)
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
         btn_select.position = Vector2(vp.x - 100, vp.y - 70)
+        dpad.position = Vector2(8, 96)
+        dpad.size = Vector2(112, 112)
     else:
         top_stats.position = Vector2(8, 8)
         top_stats.size = Vector2(100, 58)
@@ -282,8 +305,18 @@ func _sync_mobile_layout() -> void:
         pad_label.size = Vector2(64, 18)
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
         btn_select.position = Vector2(vp.x - 100, vp.y - 70)
+        dpad.position = Vector2(8, vp.y - 120)
+        dpad.size = Vector2(112, 112)
 
     touch_pad.set_enabled(mobile and not dialogue_active)
+    dpad.visible = mobile and not dialogue_active
+
+    corner_markers.visible = true
+    marker_tl.position = Vector2(2, 2)
+    marker_tr.position = Vector2(vp.x - 7, 2)
+    marker_bl.position = Vector2(2, vp.y - 7)
+    marker_br.position = Vector2(vp.x - 7, vp.y - 7)
+
     _refresh_top_labels()
 
 
@@ -301,6 +334,30 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_axis_changed(value: Vector2) -> void:
     touch_axis = value
+
+
+func _set_dpad_axis(dir: String, pressed: bool) -> void:
+    match dir:
+        "up":
+            if pressed:
+                touch_axis.y = -1
+            elif touch_axis.y < 0:
+                touch_axis.y = 0
+        "down":
+            if pressed:
+                touch_axis.y = 1
+            elif touch_axis.y > 0:
+                touch_axis.y = 0
+        "left":
+            if pressed:
+                touch_axis.x = -1
+            elif touch_axis.x < 0:
+                touch_axis.x = 0
+        "right":
+            if pressed:
+                touch_axis.x = 1
+            elif touch_axis.x > 0:
+                touch_axis.x = 0
 
 
 func _on_hud_prev() -> void:

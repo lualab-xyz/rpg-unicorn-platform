@@ -77,3 +77,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Simplificar `main.gd` eliminando gestión manual de punteros/touch duplicada.
 - [x] Ajustar layout para usar viewport visible real en web/móvil (no window size bruto).
 - [x] Mover temporalmente pad móvil a esquina superior izquierda para depuración visual.
+- [x] Sustituir temporalmente pad analógico por D-pad de 4 botones para depuración de input móvil.
+- [x] Añadir marcadores visuales en las 4 esquinas del viewport para validar límites reales en cliente móvil.
