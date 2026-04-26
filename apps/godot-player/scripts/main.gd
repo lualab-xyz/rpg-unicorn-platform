@@ -17,6 +17,7 @@ extends Node2D
 @onready var btn_talk: Button = $HUD/HUDRoot/Actions/Talk
 @onready var btn_select: Button = $HUD/HUDRoot/Actions/Select
 @onready var btn_attack: Button = $HUD/HUDRoot/Actions/Attack
+@onready var actions_root: Control = $HUD/HUDRoot/Actions
 @onready var top_stats: Panel = $HUD/HUDRoot/TopStats
 @onready var top_title: Panel = $HUD/HUDRoot/TopTitle
 @onready var top_map: Panel = $HUD/HUDRoot/TopMap
@@ -321,8 +322,11 @@ func _sync_mobile_layout() -> void:
         dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
 
-        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
-        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
+        actions_root.position = Vector2(vp.x - 100, vp.y - 120)
+        actions_root.size = Vector2(92, 116)
+        btn_talk.position = Vector2(4, 4)
+        btn_select.position = Vector2(4, 42)
+        btn_attack.position = Vector2(4, 80)
         btn_talk.text = "ACCION"
         btn_attack.text = "ATAQUE"
     else:
@@ -338,14 +342,18 @@ func _sync_mobile_layout() -> void:
         choices_panel.position = Vector2(vp.x - 180, vp.y - 180)
         choices_panel.size = Vector2(172, 84)
 
-        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
-        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
+        actions_root.position = Vector2(vp.x - 100, vp.y - 120)
+        actions_root.size = Vector2(92, 116)
+        btn_talk.position = Vector2(4, 4)
+        btn_select.position = Vector2(4, 42)
+        btn_attack.position = Vector2(4, 80)
         btn_talk.text = "SPACE"
         btn_attack.text = "CTRL"
 
     dpad.visible = mobile and not dialogue_active
     btn_talk.visible = mobile and not dialogue_active
     btn_attack.visible = mobile and not dialogue_active
+    actions_root.visible = mobile
     btn_select.visible = false
 
     _refresh_top_labels()
