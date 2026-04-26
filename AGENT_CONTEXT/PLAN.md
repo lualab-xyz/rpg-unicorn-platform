@@ -71,3 +71,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Clonar repo de referencia `stesproject/godot-2d-topdown-template` fuera del workspace principal.
 - [x] Copiar template de referencia a `example/godot-2d-topdown-template` dentro de nuestro repo.
 - [x] Revisar estructura técnica del template para identificar patrones aplicables a nuestro framework.
+- [x] Refactorizar renderer Godot a enfoque TileMapLayer-first inspirado en template de referencia.
+- [x] Rehacer escena principal para alinear mapa/collisions/UI bajo arquitectura más robusta.

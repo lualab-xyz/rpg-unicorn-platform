@@ -1,109 +1,117 @@
 extends Node2D
 
 const TILE := 16
+const LAYER_GROUND := 0
+const LAYER_PATH := 1
+const LAYER_WATER := 2
+const LAYER_BRIDGE := 3
+const LAYER_DECOR := 4
 
-@export var world_width := 2200
-@export var world_height := 1400
-@export var river := Rect2(980, 120, 260, 1160)
-@export var bridge := Rect2(940, 640, 340, 110)
-
-var tileset: Texture2D
+var tilemap: TileMap
+var source_id := 0
 
 
 func _ready() -> void:
-    tileset = load("res://assets/sprites/tileset.png")
-    queue_redraw()
+    tilemap = TileMap.new()
+    tilemap.name = "TileMap"
+    tilemap.y_sort_enabled = false
+    tilemap.rendering_quadrant_size = 16
+    add_child(tilemap)
+
+    while tilemap.get_layers_count() <= LAYER_DECOR:
+        tilemap.add_layer(tilemap.get_layers_count())
+
+    tilemap.set_layer_z_index(LAYER_GROUND, 0)
+    tilemap.set_layer_z_index(LAYER_PATH, 1)
+    tilemap.set_layer_z_index(LAYER_WATER, 2)
+    tilemap.set_layer_z_index(LAYER_BRIDGE, 3)
+    tilemap.set_layer_z_index(LAYER_DECOR, 5)
+
+    var ts := TileSet.new()
+    var atlas := TileSetAtlasSource.new()
+    atlas.texture = load("res://assets/sprites/tileset.png")
+    atlas.texture_region_size = Vector2i(TILE, TILE)
+
+    for y in range(2):
+        for x in range(8):
+            atlas.create_tile(Vector2i(x, y))
+
+    source_id = ts.get_next_source_id()
+    ts.add_source(atlas, source_id)
+    tilemap.tile_set = ts
+
+    _build_map()
 
 
-func _draw() -> void:
-    if tileset == null:
-        return
-
-    var viewport := get_viewport().get_visible_rect().size
-    var cam_pos := Vector2.ZERO
-    var cam := get_viewport().get_camera_2d()
-    if cam:
-        cam_pos = cam.global_position - viewport * 0.5
-
-    _draw_ground(cam_pos, viewport)
-    _draw_river(cam_pos, viewport)
-    _draw_bridge(cam_pos, viewport)
-    _draw_paths(cam_pos, viewport)
-    _draw_trees(cam_pos, viewport)
+func _set_cell(layer: int, wx: int, wy: int, atlas_x: int, atlas_y: int) -> void:
+    tilemap.set_cell(layer, Vector2i(wx, wy), source_id, Vector2i(atlas_x, atlas_y))
 
 
-func _process(_delta: float) -> void:
-    queue_redraw()
+func _build_map() -> void:
+    _build_ground()
+    _build_water()
+    _build_bridge()
+    _build_paths()
+    _build_trees()
 
 
-func _tile_region(tile_index: int) -> Rect2:
-    var cols := 8
-    return Rect2((tile_index % cols) * TILE, int(tile_index / cols) * TILE, TILE, TILE)
+func _build_ground() -> void:
+    var world_size := Vector2(2200, 1400)
+    var w_tiles := int(world_size.x / TILE)
+    var h_tiles := int(world_size.y / TILE)
+    for y in range(h_tiles):
+        for x in range(w_tiles):
+            var even := (x + y) % 2 == 0
+            _set_cell(LAYER_GROUND, x, y, 0 if even else 1, 0)
+            if int(x * 13 + y * 7) % 29 == 0:
+                _set_cell(LAYER_DECOR, x, y, 2, 0)
 
 
-func _draw_tile(tile_index: int, pos: Vector2) -> void:
-    draw_texture_rect_region(
-        tileset,
-        Rect2(pos, Vector2(TILE, TILE)),
-        _tile_region(tile_index),
-        Color(1, 1, 1, 1),
-        false,
-    )
+func _build_water() -> void:
+    var r := Rect2(980, 120, 260, 1160)
+    var sx := int(r.position.x / TILE)
+    var sy := int(r.position.y / TILE)
+    var w := int(r.size.x / TILE)
+    var h := int(r.size.y / TILE)
+    for y in range(h):
+        for x in range(w):
+            var even := (x + y) % 2 == 0
+            _set_cell(LAYER_WATER, sx + x, sy + y, 5 if even else 6, 0)
 
 
-func _draw_ground(cam_pos: Vector2, viewport: Vector2) -> void:
-    var start_x := int(floor(cam_pos.x / TILE)) * TILE
-    var start_y := int(floor(cam_pos.y / TILE)) * TILE
-    var end_x := int(cam_pos.x + viewport.x + TILE)
-    var end_y := int(cam_pos.y + viewport.y + TILE)
-
-    for y in range(start_y, end_y, TILE):
-        for x in range(start_x, end_x, TILE):
-            var check := int(x / TILE + y / TILE) % 2
-            var c := Color(0.47, 0.82, 0.42, 1.0) if check == 0 else Color(0.41, 0.74, 0.37, 1.0)
-            draw_rect(Rect2(Vector2(x, y), Vector2(TILE, TILE)), c, true)
-            if int((x / TILE) * 13 + (y / TILE) * 7) % 29 == 0:
-                _draw_tile(2, Vector2(x, y))
+func _build_bridge() -> void:
+    var b := Rect2(940, 640, 340, 110)
+    var sx := int(b.position.x / TILE)
+    var sy := int(b.position.y / TILE)
+    var w := int(b.size.x / TILE)
+    var h := int(b.size.y / TILE)
+    for y in range(h):
+        for x in range(w):
+            _set_cell(LAYER_BRIDGE, sx + x, sy + y, 7, 0)
 
 
-func _draw_river(cam_pos: Vector2, _viewport: Vector2) -> void:
-    var phase := int(Time.get_ticks_msec() / 220) % 2
-    var rx := river.position.x
-    var ry := river.position.y
-    for y in range(0, int(river.size.y), TILE):
-        for x in range(0, int(river.size.x), TILE):
-            var v := int(x / TILE + y / TILE + phase) % 2
-            _draw_tile(5 if v == 0 else 6, Vector2(rx + x, ry + y))
-
-
-func _draw_bridge(cam_pos: Vector2, _viewport: Vector2) -> void:
-    var bx := bridge.position.x
-    var by := bridge.position.y
-    for y in range(0, int(bridge.size.y), TILE):
-        for x in range(0, int(bridge.size.x), TILE):
-            _draw_tile(7, Vector2(bx + x, by + y))
-
-
-func _draw_paths(cam_pos: Vector2, _viewport: Vector2) -> void:
+func _build_paths() -> void:
     var zones := [
         Rect2(120, 705, 860, 42),
         Rect2(1240, 705, 840, 42),
     ]
     for zone_data in zones:
         var zone := zone_data as Rect2
-        var px := zone.position.x
-        var py := zone.position.y
-        for y in range(0, int(zone.size.y), TILE):
-            for x in range(0, int(zone.size.x), TILE):
-                var v := int(x / TILE + y / TILE) % 2
-                _draw_tile(3 if v == 0 else 4, Vector2(px + x, py + y))
+        var sx := int(zone.position.x / TILE)
+        var sy := int(zone.position.y / TILE)
+        var w := int(zone.size.x / TILE)
+        var h := int(zone.size.y / TILE)
+        for y in range(h):
+            for x in range(w):
+                var even := (x + y) % 2 == 0
+                _set_cell(LAYER_PATH, sx + x, sy + y, 3 if even else 4, 0)
 
 
-func _draw_trees(cam_pos: Vector2, _viewport: Vector2) -> void:
+func _build_trees() -> void:
     for i in range(8):
         var tx := 140 + i * 240
         var ty := 380 if i % 2 == 0 else 980
-        var px := tx
-        var py := ty
-        _draw_tile(8, Vector2(px + 3, py + 10))
-        _draw_tile(9 + (i % 2), Vector2(px, py))
+        var cx := int(tx / TILE)
+        var cy := int(ty / TILE)
+        _set_cell(LAYER_DECOR, cx, cy, 9 + (i % 2), 1)
+        _set_cell(LAYER_DECOR, cx, cy + 1, 8, 1)

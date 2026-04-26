@@ -105,6 +105,12 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - `SceneManager` con cargas asíncronas y transiciones,
   - presets de pixel-art bien fijados en `project.godot` (scale_mode integer + snap to pixel + filter off).
 
+## Refactor en curso (Godot)
+- Se inició refactor fuerte de `apps/godot-player` priorizando robustez visual:
+  - renderer migrado a `TileMap` multicapa programático (`ground/path/water/bridge/decor`),
+  - escena `main.tscn` reconstruida para coherencia entre render y colisiones,
+  - validación headless sin errores tras ajuste de capas del tilemap.
+
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.
 - Pages habilitado tras cambio de repositorio a público.
