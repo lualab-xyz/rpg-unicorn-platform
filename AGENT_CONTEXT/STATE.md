@@ -133,6 +133,9 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - acción secundaria de ataque añadida en móvil (botón) y escritorio (`CTRL`).
 - Issue detectado: en algunos móviles web se estaba activando layout escritorio.
 - Fix aplicado: detección móvil híbrida (features + geometría viewport + detección táctil real) con refresco de layout en primer touch.
+- Rework aplicado ante regresión: `main.gd` reescrito para separar claramente comportamientos desktop/móvil.
+- D-pad ahora se evalúa por estado continuo (`button_pressed`) para permitir mantener pulsación y movimiento fluido.
+- Botones móviles de acción (`ACCION`, `ATAQUE`) forzados en esquina inferior derecha solo en modo móvil.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

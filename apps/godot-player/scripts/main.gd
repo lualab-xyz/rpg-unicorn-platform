@@ -9,7 +9,6 @@ extends Node2D
 @onready var choices_panel: Panel = $HUD/HUDRoot/ChoicesPanel
 @onready var choices_label: Label = $HUD/HUDRoot/ChoicesPanel/Choices
 @onready var touch_pad = $HUD/HUDRoot/TouchPad
-@onready var pad_label: Label = $HUD/HUDRoot/TouchPad/PadLabel
 @onready var dpad: Control = $HUD/HUDRoot/DPad
 @onready var dpad_up: Button = $HUD/HUDRoot/DPad/Up
 @onready var dpad_down: Button = $HUD/HUDRoot/DPad/Down
@@ -27,17 +26,16 @@ extends Node2D
 @onready var top_stats_label: Label = $HUD/HUDRoot/TopStats/Label
 @onready var top_title_label: Label = $HUD/HUDRoot/TopTitle/Label
 @onready var top_map_label: Label = $HUD/HUDRoot/TopMap/Label
-@onready var corner_markers: Control = $HUD/HUDRoot/CornerMarkers
 
 var touch_axis := Vector2.ZERO
 var hud_index := 0
 var attack_latch := false
 var touch_seen := false
+var interaction_latch := false
 
 var dialogue_active := false
 var dialogue_node := ""
 var dialogue_index := 0
-var interaction_latch := false
 
 var dialogue_tree := {
     "start": {
@@ -77,9 +75,6 @@ func _ready() -> void:
     _set_dialog_visible(false)
     _set_choices_visible(false)
 
-    btn_talk.visible = false
-    btn_select.visible = false
-    btn_attack.visible = false
     btn_talk.pressed.connect(_on_talk_pressed)
     btn_select.pressed.connect(_on_select_pressed)
     btn_attack.pressed.connect(_on_attack_pressed)
@@ -89,38 +84,24 @@ func _ready() -> void:
     touch_pad.axis_changed.connect(_on_touch_axis_changed)
     touch_pad.mouse_filter = Control.MOUSE_FILTER_STOP
     touch_pad.knob.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    pad_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-    touch_pad.modulate = Color(1, 1, 1, 0.95)
-    touch_pad.knob.modulate = Color(1, 0.8, 0.93, 1)
-    pad_label.modulate = Color(1, 1, 1, 1)
-
-    dpad_up.button_down.connect(func(): _set_dpad_axis("up", true))
-    dpad_up.button_up.connect(func(): _set_dpad_axis("up", false))
-    dpad_down.button_down.connect(func(): _set_dpad_axis("down", true))
-    dpad_down.button_up.connect(func(): _set_dpad_axis("down", false))
-    dpad_left.button_down.connect(func(): _set_dpad_axis("left", true))
-    dpad_left.button_up.connect(func(): _set_dpad_axis("left", false))
-    dpad_right.button_down.connect(func(): _set_dpad_axis("right", true))
-    dpad_right.button_up.connect(func(): _set_dpad_axis("right", false))
-
     _refresh_top_labels()
 
 
 func _is_mobile_ui() -> bool:
-    var ws := DisplayServer.window_get_size()
-    var vp := get_viewport().get_visible_rect().size
-    var min_side := minf(vp.x, vp.y)
-
     if OS.has_feature("mobile"):
         return true
     if touch_seen:
         return true
     if OS.has_feature("web"):
-        if min_side <= 700:
-            return true
-        if vp.y > vp.x:
-            return true
-        return ws.x <= 980
+        if Engine.has_singleton("JavaScriptBridge"):
+            var ww := int(JavaScriptBridge.eval("window.innerWidth", true))
+            var wh := int(JavaScriptBridge.eval("window.innerHeight", true))
+            var coarse := bool(JavaScriptBridge.eval("window.matchMedia('(pointer: coarse)').matches", true))
+            var mobile_ua := bool(JavaScriptBridge.eval("/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)", true))
+            if coarse or mobile_ua:
+                return true
+            return min(ww, wh) <= 520
+        return false
     return false
 
 
@@ -130,35 +111,21 @@ func _notification(what: int) -> void:
 
 
 func _physics_process(_delta: float) -> void:
+    var mobile := _is_mobile_ui()
     var axis := _movement_axis()
     player.call("set_input_vector", axis)
     player.call("set_locked", dialogue_active)
 
     var can_talk := _near_npc()
-    btn_talk.visible = _is_mobile_ui()
-    btn_select.visible = false
-    btn_attack.visible = _is_mobile_ui() and not dialogue_active
+    btn_talk.visible = mobile and not dialogue_active
+    btn_attack.visible = mobile and not dialogue_active
     touch_pad.set_enabled(false)
-    dpad.visible = _is_mobile_ui() and not dialogue_active
+    dpad.visible = mobile and not dialogue_active
 
     if can_talk and not dialogue_active:
-        if Input.is_action_pressed("ui_accept"):
-            if not interaction_latch:
-                _start_dialogue()
-                interaction_latch = true
-        else:
-            interaction_latch = false
-    elif not dialogue_active:
-        interaction_latch = false
-
-    if not dialogue_active:
-        if Input.is_key_pressed(KEY_CTRL):
-            if not attack_latch:
-                _do_attack()
-                attack_latch = true
-        else:
-            attack_latch = false
-
+        if Input.is_action_pressed("ui_accept") and not interaction_latch:
+            _start_dialogue()
+            interaction_latch = true
     if dialogue_active:
         if Input.is_action_just_pressed("ui_up"):
             _step_choice(-1)
@@ -171,15 +138,41 @@ func _physics_process(_delta: float) -> void:
     if not Input.is_action_pressed("ui_accept"):
         interaction_latch = false
 
+    if not dialogue_active:
+        if Input.is_key_pressed(KEY_CTRL):
+            if not attack_latch:
+                _do_attack()
+                attack_latch = true
+        else:
+            attack_latch = false
+
+
 func _movement_axis() -> Vector2:
     if dialogue_active:
         return Vector2.ZERO
     var axis := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
     if touch_axis != Vector2.ZERO:
         axis += touch_axis
+    var pad_axis := _dpad_axis()
+    if dpad.visible and pad_axis != Vector2.ZERO:
+        axis += pad_axis
     if axis.length() > 1.0:
         axis = axis.normalized()
     return axis
+
+
+func _dpad_axis() -> Vector2:
+    var x := 0.0
+    var y := 0.0
+    if dpad_left.button_pressed:
+        x -= 1.0
+    if dpad_right.button_pressed:
+        x += 1.0
+    if dpad_up.button_pressed:
+        y -= 1.0
+    if dpad_down.button_pressed:
+        y += 1.0
+    return Vector2(x, y)
 
 
 func _near_npc() -> bool:
@@ -222,17 +215,14 @@ func _render_dialogue() -> void:
 
 
 func _fit_dialog_text(full_text: String) -> String:
-    var vp := get_viewport().get_visible_rect().size
-    var chars_per_line := 38
+    var chars_per_line := 36
     var max_lines := 3
-    if _is_mobile_ui() or vp.x < 420:
+    if _is_mobile_ui():
         chars_per_line = 28
-        max_lines = 3
 
     var words := full_text.split(" ")
     var lines: Array[String] = []
     var line := ""
-
     for word in words:
         var candidate := word if line == "" else line + " " + word
         if candidate.length() > chars_per_line and line != "":
@@ -242,7 +232,6 @@ func _fit_dialog_text(full_text: String) -> String:
             line = candidate
     if line != "":
         lines.append(line)
-
     if lines.size() > max_lines:
         lines = lines.slice(0, max_lines)
     return "\n".join(lines)
@@ -286,7 +275,6 @@ func _on_talk_pressed() -> void:
         return
     if _near_npc():
         _start_dialogue()
-        interaction_latch = true
 
 
 func _on_select_pressed() -> void:
@@ -309,6 +297,7 @@ func _sync_mobile_layout() -> void:
     var mobile := _is_mobile_ui()
     var vp := get_viewport().get_visible_rect().size
     var hud_panels := [top_stats, top_title, top_map]
+
     hud_nav.visible = mobile
     for i in range(hud_panels.size()):
         hud_panels[i].visible = (not mobile) or i == hud_index
@@ -320,60 +309,44 @@ func _sync_mobile_layout() -> void:
         top_title.size = top_stats.size
         top_map.position = top_stats.position
         top_map.size = top_stats.size
+
         hud_nav.position = Vector2(8, 66)
         hud_nav.size = Vector2(104, 26)
+
         dialog_panel.position = Vector2(8, 72)
         dialog_panel.size = Vector2(vp.x - 16, 68)
         choices_panel.position = Vector2(8, 146)
         choices_panel.size = Vector2(vp.x - 16, 54)
-        touch_pad.position = Vector2(8, 96)
-        touch_pad.size = Vector2(112, 112)
-        touch_pad.knob.position = Vector2(42, 42)
-        touch_pad.knob.size = Vector2(30, 30)
-        touch_pad.radius = 44.0
-        pad_label.position = Vector2(14, 84)
-        pad_label.size = Vector2(84, 18)
-        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
-        btn_select.position = Vector2(vp.x - 100, vp.y - 70)
-        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
+
         dpad.position = Vector2(8, vp.y - 120)
         dpad.size = Vector2(112, 112)
+
+        btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
+        btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
         btn_talk.text = "ACCION"
         btn_attack.text = "ATAQUE"
     else:
         top_stats.position = Vector2(8, 8)
-        top_stats.size = Vector2(100, 58)
-        top_title.position = Vector2(116, 8)
-        top_title.size = Vector2(98, 32)
-        top_map.position = Vector2(222, 8)
-        top_map.size = Vector2(90, 32)
-        dialog_panel.position = Vector2(8, vp.y - 84)
-        dialog_panel.size = Vector2(vp.x - 16, 76)
-        choices_panel.position = Vector2(vp.x - 140, vp.y - 160)
-        choices_panel.size = Vector2(132, 72)
-        touch_pad.position = Vector2(8, vp.y - 120)
-        touch_pad.size = Vector2(96, 96)
-        touch_pad.knob.position = Vector2(36, 36)
-        touch_pad.knob.size = Vector2(24, 24)
-        touch_pad.radius = 38.0
-        pad_label.position = Vector2(18, 70)
-        pad_label.size = Vector2(64, 18)
+        top_stats.size = Vector2(112, 58)
+        top_title.position = Vector2(128, 8)
+        top_title.size = Vector2(172, 32)
+        top_map.position = Vector2(vp.x - 100, 8)
+        top_map.size = Vector2(92, 32)
+
+        dialog_panel.position = Vector2(8, vp.y - 92)
+        dialog_panel.size = Vector2(vp.x - 16, 84)
+        choices_panel.position = Vector2(vp.x - 180, vp.y - 180)
+        choices_panel.size = Vector2(172, 84)
+
         btn_talk.position = Vector2(vp.x - 100, vp.y - 112)
-        btn_select.position = Vector2(vp.x - 100, vp.y - 70)
         btn_attack.position = Vector2(vp.x - 100, vp.y - 70)
-        dpad.position = Vector2(8, vp.y - 120)
-        dpad.size = Vector2(112, 112)
         btn_talk.text = "SPACE"
-        btn_select.text = "ENTER"
         btn_attack.text = "CTRL"
 
-    touch_pad.set_enabled(false)
     dpad.visible = mobile and not dialogue_active
-    btn_talk.visible = mobile
-    btn_select.visible = false
+    btn_talk.visible = mobile and not dialogue_active
     btn_attack.visible = mobile and not dialogue_active
-
-    corner_markers.visible = false
+    btn_select.visible = false
 
     _refresh_top_labels()
 
@@ -397,30 +370,6 @@ func _input(event: InputEvent) -> void:
 
 func _on_touch_axis_changed(value: Vector2) -> void:
     touch_axis = value
-
-
-func _set_dpad_axis(dir: String, pressed: bool) -> void:
-    match dir:
-        "up":
-            if pressed:
-                touch_axis.y = -1
-            elif touch_axis.y < 0:
-                touch_axis.y = 0
-        "down":
-            if pressed:
-                touch_axis.y = 1
-            elif touch_axis.y > 0:
-                touch_axis.y = 0
-        "left":
-            if pressed:
-                touch_axis.x = -1
-            elif touch_axis.x < 0:
-                touch_axis.x = 0
-        "right":
-            if pressed:
-                touch_axis.x = 1
-            elif touch_axis.x > 0:
-                touch_axis.x = 0
 
 
 func _on_hud_prev() -> void:

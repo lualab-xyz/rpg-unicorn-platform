@@ -89,3 +89,6 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Añadir botón de ataque en UI móvil y atajo `CTRL` en escritorio como acción secundaria.
 - [x] Corregir detección de modo móvil en web para que no caiga en layout escritorio en teléfonos.
 - [x] Forzar refresco de layout al detectar primer evento táctil real.
+- [x] Reescribir controlador HUD/input para separar de forma estricta layout desktop vs móvil.
+- [x] Restaurar pulsación mantenida en D-pad con lectura continua de `button_pressed`.
+- [x] Garantizar botones de acción móviles visibles en esquina inferior derecha.
