@@ -32,6 +32,7 @@ extends Node2D
 var touch_axis := Vector2.ZERO
 var hud_index := 0
 var attack_latch := false
+var touch_seen := false
 
 var dialogue_active := false
 var dialogue_node := ""
@@ -107,10 +108,19 @@ func _ready() -> void:
 
 func _is_mobile_ui() -> bool:
     var ws := DisplayServer.window_get_size()
+    var vp := get_viewport().get_visible_rect().size
+    var min_side := minf(vp.x, vp.y)
+
     if OS.has_feature("mobile"):
         return true
+    if touch_seen:
+        return true
     if OS.has_feature("web"):
-        return ws.x <= 900
+        if min_side <= 700:
+            return true
+        if vp.y > vp.x:
+            return true
+        return ws.x <= 980
     return false
 
 
@@ -369,6 +379,11 @@ func _sync_mobile_layout() -> void:
 
 
 func _input(event: InputEvent) -> void:
+    if event is InputEventScreenTouch or event is InputEventScreenDrag:
+        if not touch_seen:
+            touch_seen = true
+            _sync_mobile_layout()
+
     if event is InputEventKey:
         var k := event as InputEventKey
         if _is_mobile_ui() and k.pressed and not k.echo:

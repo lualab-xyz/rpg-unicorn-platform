@@ -131,6 +131,8 @@ Definir y construir una arquitectura base para mini juegos RPG 2D estilo 8-bit (
   - diálogo vuelve a modo de acción explícita (sin autoinicio),
   - HUD ajustado para no usar comportamiento de móvil en escritorio,
   - acción secundaria de ataque añadida en móvil (botón) y escritorio (`CTRL`).
+- Issue detectado: en algunos móviles web se estaba activando layout escritorio.
+- Fix aplicado: detección móvil híbrida (features + geometría viewport + detección táctil real) con refresco de layout en primer touch.
 
 ## Publicación remota
 - Workflow de Pages añadido en `.github/workflows/deploy-pages.yml`.

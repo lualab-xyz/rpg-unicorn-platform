@@ -87,3 +87,5 @@ Task actual: Spike Godot para port visual/jugable del prototipo.
 - [x] Corregir layout HUD desktop/mobile para evitar escalado tipo móvil en escritorio.
 - [x] Cambiar interacción con NPC para requerir acción explícita (sin autoinicio por proximidad).
 - [x] Añadir botón de ataque en UI móvil y atajo `CTRL` en escritorio como acción secundaria.
+- [x] Corregir detección de modo móvil en web para que no caiga en layout escritorio en teléfonos.
+- [x] Forzar refresco de layout al detectar primer evento táctil real.
